@@ -10,6 +10,7 @@ use QuarterPole\Horse;
 use QuarterPole\HorseActions;
 use QuarterPole\HorseFactory;
 use QuarterPole\Pedigree;
+use QuarterPole\Race\Entries;
 use QuarterPole\Stable;
 use QuarterPole\Training;
 use QuarterPole\UserError;
@@ -63,7 +64,66 @@ try {
             $peakYears = $settings->int('peak_years');
             $offspring = $db->all('SELECT id, name, birth_game_date FROM qp_horses WHERE sire_id = ? OR dam_id = ? ORDER BY birth_game_date DESC, name', [$horse['id'], $horse['id']]);
             $testCost = $settings->int('genetic_test_cost');
-            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'peakYears', 'offspring', 'testCost'));
+            $raceRecord = $db->all(
+                'SELECT e.finish_position, e.margin_text, e.earnings, r.id AS race_id, r.*, t.name AS track_name
+                   FROM qp_entries e JOIN qp_races r ON r.id = e.race_id JOIN qp_tracks t ON t.id = r.track_id
+                  WHERE e.horse_id = ? ORDER BY r.run_on DESC, r.id DESC LIMIT 30',
+                [$horse['id']]
+            );
+            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'peakYears', 'offspring', 'testCost', 'raceRecord'));
+            break;
+
+        case 'races':
+            $realToday = date('Y-m-d');
+            $day = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ?? '') ? $_GET['day'] : $realToday;
+            $days = $db->all(
+                'SELECT run_on, MIN(game_date) AS game_date, COUNT(*) AS races FROM qp_races
+                  WHERE run_on BETWEEN DATE_SUB(?, INTERVAL 7 DAY) AND DATE_ADD(?, INTERVAL 14 DAY) GROUP BY run_on ORDER BY run_on',
+                [$realToday, $realToday]
+            );
+            $races = $db->all(
+                'SELECT r.*, t.name AS track_name,
+                        (SELECT COUNT(*) FROM qp_entries e WHERE e.race_id = r.id) AS field
+                   FROM qp_races r JOIN qp_tracks t ON t.id = r.track_id WHERE r.run_on = ? ORDER BY t.name, r.id',
+                [$day]
+            );
+            View::render('races', $shared + compact('day', 'days', 'races', 'realToday'));
+            break;
+
+        case 'race':
+            $race = $db->one(
+                'SELECT r.*, t.name AS track_name, t.location, t.stretch, t.turn_style, t.turns
+                   FROM qp_races r JOIN qp_tracks t ON t.id = r.track_id WHERE r.id = ?',
+                [(int) ($_GET['id'] ?? 0)]
+            );
+            if (!$race) {
+                http_response_code(404);
+                View::render('not_found', $shared);
+                break;
+            }
+            $field = $db->all(
+                'SELECT e.*, h.name, h.origin, h.sex, h.birth_game_date, s.stable_name AS owner_name, j.name AS jockey_name,
+                        c.stable_name AS claimer_name,
+                        (SELECT COUNT(*) FROM qp_claims cl WHERE cl.entry_id = e.id AND cl.status = \'pending\') AS claims
+                   FROM qp_entries e JOIN qp_horses h ON h.id = e.horse_id JOIN qp_jockeys j ON j.id = e.jockey_id
+                   LEFT JOIN qp_stables s ON s.member_id = e.owner_id LEFT JOIN qp_stables c ON c.member_id = e.claimed_by
+                  WHERE e.race_id = ? ORDER BY e.finish_position IS NULL, e.finish_position, e.post_position, h.name',
+                [$race['id']]
+            );
+            $calls = [];
+            foreach ($db->all('SELECT rc.* FROM qp_race_calls rc JOIN qp_entries e ON e.id = rc.entry_id WHERE e.race_id = ?', [$race['id']]) as $c) {
+                $calls[$c['entry_id']][$c['call_point']] = $c;
+            }
+            $fractions = $db->all('SELECT * FROM qp_race_fractions WHERE race_id = ? ORDER BY at_f', [$race['id']]);
+            $entriesSvc = new Entries($db, $settings);
+            $candidates = $stable && $race['status'] === 'open' ? $entriesSvc->candidates($member->id, $race) : [];
+            $fee = $stable ? $entriesSvc->fee($race, $stable) : (int) $race['entry_fee'];
+            $myClaims = $stable ? array_column($db->all(
+                'SELECT cl.entry_id FROM qp_claims cl JOIN qp_entries e ON e.id = cl.entry_id WHERE e.race_id = ? AND cl.member_id = ?',
+                [$race['id'], $member->id]
+            ), 'entry_id') : [];
+            $isOpen = $race['status'] === 'open' && $race['run_on'] >= date('Y-m-d');
+            View::render('race', $shared + compact('race', 'field', 'calls', 'fractions', 'candidates', 'fee', 'myClaims', 'isOpen'));
             break;
 
         default:
@@ -98,6 +158,17 @@ try {
                     default   => 'Nothing to do.',
                 });
                 View::redirect('?page=horse&id=' . $horseId);
+            }
+
+            if (in_array($page, ['race-enter', 'race-scratch', 'race-claim'], true) && $isPost) {
+                $entriesSvc = new Entries($db, $settings);
+                $raceId = (int) ($_POST['race_id'] ?? 0);
+                View::flash(match ($page) {
+                    'race-enter'   => $entriesSvc->enter($member->id, $raceId, (int) $_POST['horse_id'], date('Y-m-d')),
+                    'race-scratch' => $entriesSvc->scratch($member->id, (int) $_POST['entry_id'], date('Y-m-d')),
+                    'race-claim'   => $entriesSvc->claim($member->id, (int) $_POST['entry_id'], date('Y-m-d')),
+                });
+                View::redirect('?page=race&id=' . $raceId);
             }
 
             if ($page === 'studs') {
@@ -160,6 +231,7 @@ try {
     View::flash($err->getMessage(), 'error');
     View::redirect(match ($page) {
         'create-stable', 'train' => '?',
+        'race-enter', 'race-scratch', 'race-claim' => '?page=race&id=' . (int) ($_POST['race_id'] ?? 0),
         'horse-action' => '?page=horse&id=' . (int) ($_POST['horse_id'] ?? 0),
         'breed' => '?page=breed&sire=' . (int) ($_POST['sire_id'] ?? $_GET['sire'] ?? 0) . '&dam=' . (int) ($_POST['dam_id'] ?? 0),
         default => '?page=' . rawurlencode($page),

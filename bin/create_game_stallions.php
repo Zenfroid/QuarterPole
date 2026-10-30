@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 use QuarterPole\GameClock;
 use QuarterPole\HorseFactory;
+use QuarterPole\Names;
 
 if (PHP_SAPI !== 'cli') {
     exit('Run this from the command line.');
@@ -17,18 +18,10 @@ $perSurface = max(1, (int) ($argv[1] ?? 6));
 $factory = new HorseFactory($db, $settings, $clock);
 $year = (int) $clock->today()->format('Y');
 
-// Name parts for generated stallions. Combined names are checked for uniqueness.
-$first = ['Royal', 'Silver', 'Northern', 'Iron', 'Golden', 'Midnight', 'Thunder', 'Brave', 'Storm', 'Copper',
-          'Highland', 'Rapid', 'Noble', 'Crimson', 'Wild', 'Lucky', 'Steel', 'Valiant', 'Shadow', 'Prairie'];
-$second = ['Command', 'Legacy', 'Dancer', 'Express', 'Warrior', 'Ruler', 'Crown', 'Ransom', 'Ridge', 'Echo',
-           'Charter', 'Banner', 'Harbor', 'Summit', 'Glory', 'Sovereign', 'Ledger', 'Comet', 'Anthem', 'Rogue'];
-
 $made = 0;
 foreach (['dirt', 'turf', 'steeplechase'] as $surface) {
     for ($i = 0; $i < $perSurface; $i++) {
-        do {
-            $name = $first[array_rand($first)] . ' ' . $second[array_rand($second)];
-        } while ($db->value('SELECT 1 FROM qp_horses WHERE name = ?', [$name]));
+        $name = Names::unique($db);
 
         $row = $factory->rollFoundation($surface);
         // Game studs are proven stock: lift their racing stats a little.

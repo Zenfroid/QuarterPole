@@ -12,6 +12,7 @@
   <a class="brand" href="?"><?= e($config['site_name']) ?></a>
   <span class="date"><?= e(GameClock::label($today)) ?></span>
   <nav>
+    <a href="?page=races">Races</a>
     <?php if ($member): ?>
       <?php if ($stable): ?>
         <a href="?page=studs">Stallions</a>
