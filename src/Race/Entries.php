@@ -20,6 +20,9 @@ final class Entries
         if ($h['status'] !== 'active') {
             return 'only active horses can race';
         }
+        if ($h['surface_pref'] !== $race['surface']) {
+            return 'runs on ' . $h['surface_pref'] . ', not ' . $race['surface'];
+        }
         $age = GameClock::ageOn($h['birth_game_date'], new \DateTimeImmutable($race['game_date']));
         if ($age < (int) $race['age_min'] || ($race['age_max'] !== null && $age > (int) $race['age_max'])) {
             return 'wrong age';
@@ -67,14 +70,14 @@ final class Entries
         return $fee;
     }
 
-    /** The player's horses that could be entered, with the reason for any that can't. */
+    /** The player's horses for this race's surface, with the reason for any that can't enter. */
     public function candidates(int $memberId, array $race): array
     {
         $horses = $this->db->all(
             "SELECT h.*, (SELECT r.id FROM qp_entries e JOIN qp_races r ON r.id = e.race_id
                            WHERE e.horse_id = h.id AND r.run_on = ? AND r.status IN ('open','closed') LIMIT 1) AS busy_race
-               FROM qp_horses h WHERE h.owner_id = ? AND h.status = 'active' ORDER BY h.name",
-            [$race['run_on'], $memberId]
+               FROM qp_horses h WHERE h.owner_id = ? AND h.status = 'active' AND h.surface_pref = ? ORDER BY h.name",
+            [$race['run_on'], $memberId, $race['surface']]
         );
         foreach ($horses as &$h) {
             $h['why_not'] = self::ineligible($race, $h) ?? ($h['busy_race'] ? 'already entered that day' : null);
