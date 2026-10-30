@@ -79,6 +79,7 @@ final class Runner
             if ($race['series_id'] !== null) {
                 $this->checkSeries($race, $runners[$result['order'][0]]);
             }
+            $this->scratchFromMaidens($runners[$result['order'][0]]);
             return true;
         });
     }
@@ -126,6 +127,23 @@ final class Runner
         }
         foreach ($result['fractions'] as $at => $time) {
             $this->db->run('INSERT INTO qp_race_fractions (race_id, at_f, time_s) VALUES (?, ?, ?)', [$race['id'], $at, round($time, 2)]);
+        }
+    }
+
+    /** A winner is no longer a maiden: take it out of any maiden races it is entered in later, refunding the fee. */
+    private function scratchFromMaidens(array $winner): void
+    {
+        $later = $this->db->all(
+            "SELECT e.id, e.race_id, e.owner_id, e.fee_paid FROM qp_entries e JOIN qp_races r ON r.id = e.race_id
+              WHERE e.horse_id = ? AND r.race_level = 'maiden' AND r.status = 'open'",
+            [$winner['id']]
+        );
+        $ledger = new Ledger($this->db);
+        foreach ($later as $e) {
+            if ($e['owner_id'] !== null && (int) $e['fee_paid'] > 0) {
+                $ledger->move((int) $e['owner_id'], (int) $e['fee_paid'], 'refund', 'qp_races', (int) $e['race_id'], 'Won, no longer a maiden: ' . $winner['name']);
+            }
+            $this->db->run('DELETE FROM qp_entries WHERE id = ?', [$e['id']]);
         }
     }
 
