@@ -24,7 +24,7 @@ $status = function (array $r) use ($realToday): string {
   </nav>
 
   <?php if (!$races): ?>
-    <p class="panel">No races on this day. Stakes days (Wednesday, Saturday and Sunday) start once the race calendar is in.</p>
+    <p class="panel">No races on this day.</p>
   <?php endif ?>
 
   <?php foreach ($byTrack as $track => $list): ?>

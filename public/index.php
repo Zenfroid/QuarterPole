@@ -11,6 +11,7 @@ use QuarterPole\HorseActions;
 use QuarterPole\HorseFactory;
 use QuarterPole\Pedigree;
 use QuarterPole\Race\Entries;
+use QuarterPole\Race\Stakes;
 use QuarterPole\Stable;
 use QuarterPole\TrainerNotes;
 use QuarterPole\Training;
@@ -193,6 +194,42 @@ try {
                 break;
             }
 
+            if ($page === 'admin-stakes') {
+                if (!$member->isAdmin) {
+                    http_response_code(403);
+                    View::render('not_found', $shared);
+                    break;
+                }
+                $stakesSvc = new Stakes($db);
+                if ($isPost) {
+                    $sid = ($_POST['id'] ?? '') === '' ? null : (int) $_POST['id'];
+                    try {
+                        View::flash($stakesSvc->save($sid, $_POST));
+                    } catch (UserError $err) {
+                        // Keep what was typed so the form comes back filled in.
+                        $_SESSION['stakes_form'] = $_POST;
+                        throw $err;
+                    }
+                    View::redirect('?page=admin-stakes');
+                }
+                $all = $stakesSvc->all();
+                $editId = (int) ($_GET['edit'] ?? 0);
+                $editing = null;
+                foreach ($all as $st) {
+                    if ((int) $st['id'] === $editId) {
+                        $editing = $st;
+                    }
+                }
+                if (isset($_SESSION['stakes_form'])) {
+                    $editing = array_merge($editing ?? ['series_name' => null, 'series_leg' => null], $_SESSION['stakes_form'],
+                        ['homebred_only' => !empty($_SESSION['stakes_form']['homebred_only']), 'active' => !empty($_SESSION['stakes_form']['active'])]);
+                    unset($_SESSION['stakes_form']);
+                }
+                $trackList = $db->all('SELECT * FROM qp_tracks ORDER BY active DESC, name');
+                View::render('admin_stakes', $shared + ['stakes' => $all, 'editing' => $editing, 'trackList' => $trackList, 'adding' => isset($_GET['add'])]);
+                break;
+            }
+
             if ($page === 'admin-reports') {
                 if (!$member->isAdmin) {
                     http_response_code(403);
@@ -265,13 +302,15 @@ try {
 
             $p = max(1, (int) ($_GET['p'] ?? 1));
             $list = $stables->horses($member->id, $p);
-            View::render('stable', $shared + ['list' => $list, 'p' => $p]);
+            $badges = $db->all('SELECT b.badge_code, s.name FROM qp_badges b LEFT JOIN qp_series s ON s.badge_code = b.badge_code WHERE b.member_id = ? ORDER BY b.earned_at', [$member->id]);
+            View::render('stable', $shared + ['list' => $list, 'p' => $p, 'badges' => $badges]);
     }
 } catch (UserError $err) {
     // Show the problem and return the player to the form they came from.
     View::flash($err->getMessage(), 'error');
     View::redirect(match ($page) {
         'create-stable', 'train' => '?',
+        'admin-stakes' => '?page=admin-stakes' . (($_POST['id'] ?? '') === '' ? '&add=1' : '&edit=' . (int) $_POST['id']),
         'race-enter', 'race-scratch', 'race-claim' => '?page=race&id=' . (int) ($_POST['race_id'] ?? 0),
         'horse-action' => '?page=horse&id=' . (int) ($_POST['horse_id'] ?? 0),
         'breed' => '?page=breed&sire=' . (int) ($_POST['sire_id'] ?? $_GET['sire'] ?? 0) . '&dam=' . (int) ($_POST['dam_id'] ?? 0),

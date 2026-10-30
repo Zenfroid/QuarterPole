@@ -251,11 +251,36 @@ CREATE TABLE qp_series (
   badge_code  VARCHAR(40) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Named stakes races that recur every game year. Each runs on the first Wednesday,
+-- Saturday or Sunday race day on or after its game month and day. Edited on the admin page.
+CREATE TABLE qp_stakes (
+  id              SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name            VARCHAR(80)  NOT NULL,
+  track_id        SMALLINT UNSIGNED NOT NULL,
+  series_id       SMALLINT UNSIGNED NULL,
+  series_leg      TINYINT UNSIGNED NULL,
+  race_level      ENUM('g3','g2','g1') NOT NULL,
+  surface         ENUM('dirt','turf','steeplechase') NOT NULL,
+  distance_f      DECIMAL(4,2) NOT NULL,
+  age_min         TINYINT UNSIGNED NOT NULL,
+  age_max         TINYINT UNSIGNED NULL,
+  sex_rule        ENUM('open','colts_geldings','fillies_mares') NOT NULL DEFAULT 'open',
+  homebred_only   TINYINT(1)   NOT NULL DEFAULT 0,
+  game_month      TINYINT UNSIGNED NOT NULL,
+  game_day        TINYINT UNSIGNED NOT NULL,
+  weekday         ENUM('wed','sat','sun') NOT NULL,   -- Sunday is steeplechase
+  purse           INT UNSIGNED NOT NULL,
+  active          TINYINT(1)   NOT NULL DEFAULT 1,
+  CONSTRAINT fk_stakes_track  FOREIGN KEY (track_id)  REFERENCES qp_tracks(id),
+  CONSTRAINT fk_stakes_series FOREIGN KEY (series_id) REFERENCES qp_series(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE qp_races (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   track_id        SMALLINT UNSIGNED NOT NULL,
   series_id       SMALLINT UNSIGNED NULL,
   series_leg      TINYINT UNSIGNED NULL,
+  stakes_id       SMALLINT UNSIGNED NULL,          -- the recurring named stakes this running belongs to
   name            VARCHAR(80)  NULL,               -- stakes have names; others are 'Race 4' etc.
   race_level      ENUM('maiden','claiming','allowance','g3','g2','g1') NOT NULL,
   surface         ENUM('dirt','turf','steeplechase') NOT NULL,
@@ -272,8 +297,10 @@ CREATE TABLE qp_races (
   track_condition VARCHAR(16)  NULL,               -- 'fast','good','muddy','sloppy','firm','yielding','soft'...
   status          ENUM('open','closed','run','cancelled') NOT NULL DEFAULT 'open',
   KEY ix_race_day (run_on, status),
+  KEY ix_race_stakes (stakes_id, game_date),
   CONSTRAINT fk_race_track  FOREIGN KEY (track_id)  REFERENCES qp_tracks(id),
-  CONSTRAINT fk_race_series FOREIGN KEY (series_id) REFERENCES qp_series(id)
+  CONSTRAINT fk_race_series FOREIGN KEY (series_id) REFERENCES qp_series(id),
+  CONSTRAINT fk_race_stakes FOREIGN KEY (stakes_id) REFERENCES qp_stakes(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- One row per horse in a race, player or ghost.

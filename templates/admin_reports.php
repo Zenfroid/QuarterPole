@@ -9,7 +9,7 @@ foreach ($lines as $l) {
 }
 ?>
 <section>
-  <p class="muted"><a href="?page=admin-settings">Game settings</a> · Trainer's report wording</p>
+  <p class="muted"><a href="?page=admin-settings">Game settings</a> · Trainer's report wording · <a href="?page=admin-stakes">Stakes calendar</a></p>
   <h1>Trainer's report wording</h1>
   <p class="muted">When a slot has several lines, the trainer picks one at random. Write <code>{name}</code> to use the horse's name. Clear a line to remove it. Reports already written keep their old wording.</p>
   <div class="report-admin">
