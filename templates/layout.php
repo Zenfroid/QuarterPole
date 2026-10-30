@@ -16,6 +16,7 @@
     <?php if ($member): ?>
       <?php if ($stable): ?>
         <a href="?page=studs">Stallions</a>
+        <?php if ($member->isAdmin): ?><a href="?page=admin-settings">Settings</a><?php endif ?>
         <span class="stat"><?= e(money($stable['cash'])) ?></span>
         <span class="stat"><?= (int) $stable['creation_credits'] ?> credits</span>
       <?php endif ?>

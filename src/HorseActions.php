@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace QuarterPole;
 
-// Owner actions on the horse page: retire to breeding, stud settings, genetic test.
+// Owner actions on the horse page: retire to breeding, stud settings, genetic test,
+// trainer report upgrades, pensioning and TRP rehoming.
 final class HorseActions
 {
     public function __construct(private Db $db, private Settings $settings) {}
@@ -25,9 +26,7 @@ final class HorseActions
             if ($h['status'] !== 'active') {
                 throw new UserError('Only active horses can be retired to breeding.');
             }
-            if ($db->value("SELECT 1 FROM qp_entries e JOIN qp_races r ON r.id = e.race_id WHERE e.horse_id = ? AND r.status = 'open'", [$horseId])) {
-                throw new UserError($h['name'] . ' is entered in a race. Scratch first, then retire.');
-            }
+            $this->assertNotEntered($db, $h);
             $db->run("UPDATE qp_horses SET status = 'retired' WHERE id = ?", [$horseId]);
             return $h['name'] . ' is retired to breeding.';
         });
@@ -65,5 +64,68 @@ final class HorseActions
             $db->run('UPDATE qp_horses SET genetics_tested = 1 WHERE id = ?', [$horseId]);
             return 'The genetic test results for ' . $h['name'] . ' are in.';
         });
+    }
+
+    /** Hire a better trainer. Each level is written once and never redone. */
+    public function upgradeReport(int $memberId, int $horseId, string $level, \DateTimeImmutable $gameToday): string
+    {
+        return $this->db->transaction(function (Db $db) use ($memberId, $horseId, $level, $gameToday) {
+            $h = $this->owned($db, $memberId, $horseId);
+            $order = ['none' => 0, 'basic' => 1, 'experienced' => 2, 'expert' => 3];
+            if (!in_array($level, ['experienced', 'expert'], true)) {
+                throw new UserError('Pick a trainer.');
+            }
+            if (GameClock::ageOn($h['birth_game_date'], $gameToday) < 2) {
+                throw new UserError('Trainers only report on horses aged 2 or older.');
+            }
+            if ($order[$level] <= $order[$h['report_level']]) {
+                throw new UserError($h['name'] . ' already has a report at that level or better.');
+            }
+            (new Ledger($db))->move($memberId, -$this->settings->int("report_cost_$level"), 'trainer_report', 'qp_horses', $horseId,
+                ucfirst($level) . ' trainer: ' . $h['name']);
+            $db->run('INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, ?, ?)', [$horseId, $level, TrainerNotes::write($h, $level)]);
+            $db->run('UPDATE qp_horses SET report_level = ? WHERE id = ?', [$level, $horseId]);
+            return 'The ' . ($level === 'expert' ? 'Expert' : 'Experienced') . ' trainer has written up ' . $h['name'] . '.';
+        });
+    }
+
+    /** Pension (pasture puff): done racing and breeding, off to the retirement home. One way. */
+    public function pension(int $memberId, int $horseId): string
+    {
+        return $this->db->transaction(function (Db $db) use ($memberId, $horseId) {
+            $h = $this->owned($db, $memberId, $horseId);
+            if (!in_array($h['status'], ['active', 'retired'], true)) {
+                throw new UserError($h['name'] . ' is already out of the stable.');
+            }
+            $this->assertNotEntered($db, $h);
+            $db->run("UPDATE qp_horses SET status = 'pensioned', stud_fee = NULL WHERE id = ?", [$horseId]);
+            return $h['name'] . ' has gone to the retirement home to enjoy life as a pasture puff.';
+        });
+    }
+
+    /** Send to the TRP: the horse leaves the game for good and a creation credit comes back. */
+    public function rehome(int $memberId, int $horseId): string
+    {
+        return $this->db->transaction(function (Db $db) use ($memberId, $horseId) {
+            $h = $this->owned($db, $memberId, $horseId);
+            if (!in_array($h['status'], ['active', 'retired'], true)) {
+                throw new UserError($h['name'] . ' is already out of the stable.');
+            }
+            if (!$h['offered_for_sale']) {
+                throw new UserError($h['name'] . ' has to be offered first, in a claiming race or at auction, before going to the TRP.');
+            }
+            $this->assertNotEntered($db, $h);
+            $credits = $this->settings->int('trp_credit_refund');
+            $db->run("UPDATE qp_horses SET status = 'rehomed', stud_fee = NULL WHERE id = ?", [$horseId]);
+            $db->run('UPDATE qp_stables SET creation_credits = creation_credits + ? WHERE member_id = ?', [$credits, $memberId]);
+            return $h['name'] . " has gone to the Thoroughbred Rehoming Project. You got $credits creation credit" . ($credits === 1 ? '' : 's') . ' back.';
+        });
+    }
+
+    private function assertNotEntered(Db $db, array $h): void
+    {
+        if ($db->value("SELECT 1 FROM qp_entries e JOIN qp_races r ON r.id = e.race_id WHERE e.horse_id = ? AND r.status = 'open'", [$h['id']])) {
+            throw new UserError($h['name'] . ' is entered in a race. Scratch first.');
+        }
     }
 }

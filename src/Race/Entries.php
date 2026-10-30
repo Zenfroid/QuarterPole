@@ -108,6 +108,10 @@ final class Entries
             $jockey = (int) $db->value('SELECT id FROM qp_jockeys ORDER BY RAND() LIMIT 1');
             $db->run('INSERT INTO qp_entries (race_id, horse_id, owner_id, jockey_id, fee_paid) VALUES (?, ?, ?, ?, ?)',
                 [$raceId, $horseId, $memberId, $jockey, $fee]);
+            if ($race['race_level'] === 'claiming') {
+                // Running for a tag counts as offering the horse, which opens the TRP route.
+                $db->run('UPDATE qp_horses SET offered_for_sale = 1 WHERE id = ?', [$horseId]);
+            }
             if ($fee > 0) {
                 (new Ledger($db))->move($memberId, -$fee, 'entry_fee', 'qp_races', $raceId, 'Entry: ' . $h['name']);
             }

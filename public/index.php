@@ -64,13 +64,15 @@ try {
             $peakYears = $settings->int('peak_years');
             $offspring = $db->all('SELECT id, name, birth_game_date FROM qp_horses WHERE sire_id = ? OR dam_id = ? ORDER BY birth_game_date DESC, name', [$horse['id'], $horse['id']]);
             $testCost = $settings->int('genetic_test_cost');
+            $reportCosts = ['experienced' => $settings->int('report_cost_experienced'), 'expert' => $settings->int('report_cost_expert')];
+            $trpCredits = $settings->int('trp_credit_refund');
             $raceRecord = $db->all(
                 'SELECT e.finish_position, e.margin_text, e.earnings, r.id AS race_id, r.*, t.name AS track_name
                    FROM qp_entries e JOIN qp_races r ON r.id = e.race_id JOIN qp_tracks t ON t.id = r.track_id
                   WHERE e.horse_id = ? ORDER BY r.run_on DESC, r.id DESC LIMIT 30',
                 [$horse['id']]
             );
-            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'peakYears', 'offspring', 'testCost', 'raceRecord'));
+            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'peakYears', 'offspring', 'testCost', 'raceRecord', 'reportCosts', 'trpCredits'));
             break;
 
         case 'races':
@@ -154,6 +156,10 @@ try {
                 View::flash(match ($_POST['action'] ?? '') {
                     'retire'  => $actions->retire($member->id, $horseId),
                     'test'    => $actions->geneticTest($member->id, $horseId),
+                    'report_experienced' => $actions->upgradeReport($member->id, $horseId, 'experienced', $clock->today()),
+                    'report_expert'      => $actions->upgradeReport($member->id, $horseId, 'expert', $clock->today()),
+                    'pension' => $actions->pension($member->id, $horseId),
+                    'rehome'  => $actions->rehome($member->id, $horseId),
                     'stud'    => $actions->setStud($member->id, $horseId, ($_POST['stud_fee'] ?? '') === '' ? null : (int) $_POST['stud_fee'], (int) ($_POST['book_size'] ?? 0)),
                     default   => 'Nothing to do.',
                 });
@@ -169,6 +175,21 @@ try {
                     'race-claim'   => $entriesSvc->claim($member->id, (int) $_POST['entry_id'], date('Y-m-d')),
                 });
                 View::redirect('?page=race&id=' . $raceId);
+            }
+
+            if ($page === 'admin-settings') {
+                if (!$member->isAdmin) {
+                    http_response_code(403);
+                    View::render('not_found', $shared);
+                    break;
+                }
+                if ($isPost) {
+                    $changed = $settings->save((array) ($_POST['s'] ?? []));
+                    View::flash($changed ? 'Saved: ' . implode(', ', $changed) . '.' : 'Nothing changed.');
+                    View::redirect('?page=admin-settings');
+                }
+                View::render('admin_settings', $shared + ['groups' => $settings->grouped()]);
+                break;
             }
 
             if ($page === 'studs') {
