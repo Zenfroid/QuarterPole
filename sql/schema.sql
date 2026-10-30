@@ -191,12 +191,13 @@ CREATE TABLE qp_breedings (
   dam_owner_id    INT UNSIGNED NOT NULL,
   stud_fee_paid   INT UNSIGNED NOT NULL DEFAULT 0,  -- 0 when both horses have the same owner
   backdated       TINYINT(1)   NOT NULL DEFAULT 0,
-  foal_game_year  SMALLINT     NOT NULL,            -- birth year of the foal
+  foal_game_year  SMALLINT     NOT NULL,            -- birth year of the foal (game year number, can be below 1 when backdated)
+  bred_in_game_year SMALLINT   NOT NULL,            -- game year the breeding was booked; book sizes count this
   foal_id         INT UNSIGNED NULL,                -- NULL if born dead (lethal cross)
   outcome         ENUM('live','born_dead') NOT NULL DEFAULT 'live',
   created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_dam_year (dam_id, foal_game_year),  -- one foal per mare per game year
-  KEY ix_breed_sire_year (sire_id, foal_game_year), -- for book size counts
+  KEY ix_breed_sire_year (sire_id, bred_in_game_year), -- for book size counts
   CONSTRAINT fk_breed_sire FOREIGN KEY (sire_id) REFERENCES qp_horses(id),
   CONSTRAINT fk_breed_dam  FOREIGN KEY (dam_id)  REFERENCES qp_horses(id),
   CONSTRAINT fk_breed_foal FOREIGN KEY (foal_id) REFERENCES qp_horses(id)

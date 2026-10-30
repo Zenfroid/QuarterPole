@@ -11,6 +11,10 @@ The design decisions live in the design doc: https://claude.ai/artifact/1UuQMPLW
 - `sql/schema.sql`: every database table. `sql/seed.sql`: starting data, including all tunable settings, the 8 tracks (4 active at launch), the 6 series and a jockey pool.
 - `config.example.php`: copy to `config.local.php` (never committed) and fill in the database login.
 
+## Adding the game stallions
+
+After loading the database, run `php bin/create_game_stallions.php` once. It creates 6 stallions per surface, 8 to 10 years old, standing at stud with fees based on how good each one rolled (pass a number to change how many per surface).
+
 ## Running it locally
 
 1. Create a MySQL or MariaDB database, then load `sql/schema.sql` followed by `sql/seed.sql`.
@@ -47,6 +51,8 @@ The design decisions live in the design doc: https://claude.ai/artifact/1UuQMPLW
 | `qp_entries` | Each horse in a race (player or ghost), with post, finish, margin, time, earnings and claims. |
 | `qp_race_calls` / `qp_race_fractions` | Points of call and fractional times for the result chart. |
 | `qp_auctions` / `qp_bids` | 72-hour auctions with reserve prices. Buy-it-now has a column but is off at launch. |
+
+- Breeding: retire a horse to breeding (permanent), stand a retired stallion at stud (fee and book size up to 100), genetic tests (200 Cash) that reveal the genotype, a stallion list filtered by surface, and the Proposed breed page with stud fee, COI, dud chance and the lethal-white risk when both parents are tested. Foals blend the parents' stats by Potency share plus a random swing, with greatness, duds (more likely when inbred), surface inheritance and Mendelian color genes. Backdated foals can be bred into any earlier open year for the mare, and a mare has one foal per year. Stud fees go to the stallion's owner; your own stallion is free.
 
 ## Login (SMF)
 

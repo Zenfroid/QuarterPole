@@ -4,9 +4,12 @@ declare(strict_types=1);
 // Front controller: every page is index.php?page=...
 
 use QuarterPole\Auth\DevAuth;
+use QuarterPole\Breeding;
 use QuarterPole\Csrf;
 use QuarterPole\Horse;
+use QuarterPole\HorseActions;
 use QuarterPole\HorseFactory;
+use QuarterPole\Pedigree;
 use QuarterPole\Stable;
 use QuarterPole\Training;
 use QuarterPole\UserError;
@@ -56,12 +59,11 @@ try {
                 "SELECT level, notes FROM qp_trainer_reports WHERE horse_id = ? ORDER BY FIELD(level,'basic','experienced','expert')",
                 [$horse['id']]
             );
-            $parents = [
-                'sire' => $horse['sire_id'] ? Horse::find($db, (int) $horse['sire_id']) : null,
-                'dam'  => $horse['dam_id'] ? Horse::find($db, (int) $horse['dam_id']) : null,
-            ];
+            $tree = (new Pedigree($db))->tree($horse, 3);
             $peakYears = $settings->int('peak_years');
-            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'parents', 'peakYears'));
+            $offspring = $db->all('SELECT id, name, birth_game_date FROM qp_horses WHERE sire_id = ? OR dam_id = ? ORDER BY birth_game_date DESC, name', [$horse['id'], $horse['id']]);
+            $testCost = $settings->int('genetic_test_cost');
+            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'peakYears', 'offspring', 'testCost'));
             break;
 
         default:
@@ -84,6 +86,54 @@ try {
                 $horseId = (int) ($_POST['horse_id'] ?? 0);
                 View::flash((new Training($db, $settings))->train($member->id, $horseId, date('Y-m-d')));
                 View::redirect(($_POST['back'] ?? '') === 'stable' ? '?p=' . max(1, (int) ($_POST['p'] ?? 1)) : '?page=horse&id=' . $horseId);
+            }
+
+            if ($page === 'horse-action' && $isPost) {
+                $horseId = (int) ($_POST['horse_id'] ?? 0);
+                $actions = new HorseActions($db, $settings);
+                View::flash(match ($_POST['action'] ?? '') {
+                    'retire'  => $actions->retire($member->id, $horseId),
+                    'test'    => $actions->geneticTest($member->id, $horseId),
+                    'stud'    => $actions->setStud($member->id, $horseId, ($_POST['stud_fee'] ?? '') === '' ? null : (int) $_POST['stud_fee'], (int) ($_POST['book_size'] ?? 0)),
+                    default   => 'Nothing to do.',
+                });
+                View::redirect('?page=horse&id=' . $horseId);
+            }
+
+            if ($page === 'studs') {
+                $surface = in_array($_GET['surface'] ?? '', ['dirt', 'turf', 'steeplechase'], true) ? $_GET['surface'] : null;
+                $studs = (new Breeding($db, $settings, $clock))->studs($surface);
+                $bookCaps = ['game' => $settings->int('book_cap_game'), 'player' => $settings->int('book_cap_player')];
+                View::render('studs', $shared + compact('studs', 'surface', 'bookCaps'));
+                break;
+            }
+
+            if ($page === 'breed') {
+                $breeding = new Breeding($db, $settings, $clock);
+                if ($isPost) {
+                    $result = $breeding->breed($member->id, (int) $_POST['sire_id'], (int) $_POST['dam_id'], (int) $_POST['foal_year'], (string) $_POST['foal_name']);
+                    if ($result['born_dead']) {
+                        View::flash('Sadly, the foal was born dead. Both parents carry a lethal white gene.', 'error');
+                        View::redirect('?page=horse&id=' . (int) $_POST['dam_id']);
+                    }
+                    View::flash('A foal is born!');
+                    View::redirect('?page=horse&id=' . $result['foal_id']);
+                }
+                $sire = Horse::find($db, (int) ($_GET['sire'] ?? 0));
+                $mares = $breeding->mares($member->id);
+                $dam = null;
+                foreach ($mares as $m) {
+                    if ((int) $m['id'] === (int) ($_GET['dam'] ?? 0)) {
+                        $dam = $m;
+                    }
+                }
+                $proposal = null;
+                if ($sire && $dam) {
+                    $breeding->check($member->id, $sire, $dam);
+                    $proposal = $breeding->proposal($member->id, $sire, $dam);
+                }
+                View::render('breed', $shared + compact('sire', 'dam', 'mares', 'proposal'));
+                break;
             }
 
             if ($page === 'create-horse') {
@@ -110,6 +160,8 @@ try {
     View::flash($err->getMessage(), 'error');
     View::redirect(match ($page) {
         'create-stable', 'train' => '?',
+        'horse-action' => '?page=horse&id=' . (int) ($_POST['horse_id'] ?? 0),
+        'breed' => '?page=breed&sire=' . (int) ($_POST['sire_id'] ?? $_GET['sire'] ?? 0) . '&dam=' . (int) ($_POST['dam_id'] ?? 0),
         default => '?page=' . rawurlencode($page),
     });
 }

@@ -42,3 +42,21 @@ button.small { padding: 5px 12px; font-size: .9rem; }
 .flash { padding: 10px 14px; border-radius: 6px; background: var(--ok); }
 .flash.error { background: var(--error); }
 .panel h2 { margin-top: 0; }
+form.inline { display: inline; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.highlight { border-color: var(--accent); }
+.highlight .button { margin-left: 12px; }
+.pedigree { border-collapse: collapse; width: 100%; margin-bottom: 8px; }
+.pedigree td { border: 1px solid var(--border); padding: 6px 8px; vertical-align: middle; }
+.table-wrap { overflow-x: auto; }
+table.list { width: 100%; border-collapse: collapse; background: var(--surface); }
+table.list th, table.list td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+table.list .num, table.facts td { font-variant-numeric: tabular-nums; }
+table.facts { border-collapse: collapse; margin-bottom: 12px; }
+table.facts th { text-align: left; padding: 4px 16px 4px 0; font-weight: 600; }
+.filters { display: flex; gap: 12px; }
+.filters a.on { font-weight: 700; text-decoration: none; color: var(--text); }
+.warn { color: #b3261e; }
+@media (prefers-color-scheme: dark) { .warn { color: #ff8a80; } }
+.genes { font-family: ui-monospace, monospace; }
+ul.plain { list-style: none; padding: 0; margin: 0; }
