@@ -66,3 +66,12 @@ ul.plain { list-style: none; padding: 0; margin: 0; }
 .days a.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 table.chart td { font-variant-numeric: tabular-nums; }
 table.chart th, table.chart td { padding: 8px 6px; }
+.settings { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 4px 20px; }
+.settings label span { display: block; font-size: .85rem; }
+.settings code { font-size: .9rem; overflow-wrap: anywhere; }
+.report-admin { display: grid; grid-template-columns: 230px 1fr; gap: 16px; align-items: start; }
+.topic-list { display: flex; flex-direction: column; gap: 2px; }
+.topic-list a { padding: 4px 8px; border-radius: 4px; text-decoration: none; }
+.topic-list a.on { background: var(--surface); font-weight: 700; color: var(--text); }
+form input.line { display: block; width: 100%; max-width: none; margin: 0 0 6px; padding: 8px; font: inherit; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+@media (max-width: 700px) { .report-admin { grid-template-columns: 1fr; } .topic-list { flex-direction: row; flex-wrap: wrap; } }

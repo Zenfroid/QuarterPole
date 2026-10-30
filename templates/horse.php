@@ -121,6 +121,17 @@ $action = function (string $name, string $label) use ($horse): string {
         <p class="note">Retiring is permanent: a retired horse never races again.</p>
       <?php endif ?>
 
+      <?php if (in_array($horse['status'], ['active', 'retired'], true)): ?>
+        <h3>Leaving the stable</h3>
+        <div class="actions">
+          <?= str_replace('<form ', '<form onsubmit="return confirm(\'Pension this horse? This is permanent.\')" ', $action('pension', 'Pension to the retirement home')) ?>
+          <?php if ($horse['offered_for_sale']): ?>
+            <?= str_replace('<form ', '<form onsubmit="return confirm(\'Send this horse to the TRP? This is permanent.\')" ', $action('rehome', 'Send to the TRP (+' . $trpCredits . ' credit)')) ?>
+          <?php endif ?>
+        </div>
+        <p class="note">Both are permanent. A pensioned horse is done racing and breeding. The TRP takes the horse out of the game and gives back <?= $trpCredits ?> creation credit<?= $trpCredits === 1 ? '' : 's' ?>; it opens up once the horse has been offered in a claiming race or at auction.</p>
+      <?php endif ?>
+
       <?php if ($isStallion && $horse['status'] === 'retired'): ?>
         <h3>Stud settings</h3>
         <form method="post" action="?page=horse-action">
@@ -148,6 +159,19 @@ $action = function (string $name, string $label) use ($horse): string {
         </ul>
       <?php endforeach ?>
       <?php if (!$reports): ?><p class="muted">Notes arrive when the horse turns 2.</p><?php endif ?>
+      <?php if ($reports && in_array($horse['status'], ['active', 'retired'], true)): ?>
+        <div class="actions">
+          <?php if (in_array($horse['report_level'], ['none', 'basic'], true)): ?>
+            <?= $action('report_experienced', 'Hire an Experienced trainer (' . money($reportCosts['experienced']) . ')') ?>
+          <?php endif ?>
+          <?php if ($horse['report_level'] !== 'expert'): ?>
+            <?= $action('report_expert', 'Hire an Expert trainer (' . money($reportCosts['expert']) . ')') ?>
+          <?php endif ?>
+        </div>
+        <?php if ($horse['report_level'] !== 'expert'): ?>
+          <p class="note">Better trainers comment on more of the horse and misjudge it less. Each level reports once.</p>
+        <?php endif ?>
+      <?php endif ?>
     </div>
   <?php endif ?>
 

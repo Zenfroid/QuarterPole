@@ -5,6 +5,7 @@ namespace QuarterPole;
 
 // Writes the static trainer's report. Players never see numbers, only these notes,
 // and they describe the horse at its peak. Lower-level trainers misjudge more.
+// The wording lives in qp_report_lines so it can be edited on the admin page.
 final class TrainerNotes
 {
     // How far off (in stat points) each trainer can be, and how many stats they comment on.
@@ -14,74 +15,109 @@ final class TrainerNotes
         'expert'      => ['error' => 2,  'stats' => 10],
     ];
 
-    private const PHRASES = [
-        'stat_break'     => 'out of the gate',
-        'stat_sprint'    => 'when asked to kick',
-        'stat_speed'     => 'at cruising pace',
-        'stat_dexterity' => 'through the turns and in traffic',
-        'stat_temper'    => 'in temperament',
-        'stat_drive'     => 'in will to win',
-        'stat_track'     => 'on an off track',
-        'stat_scope'     => 'over fences',
-        'stat_recovery'  => 'at bouncing back after a race',
-        'stat_potency'   => 'as a prospect for breeding',
-    ];
+    public const STATS = ['break', 'sprint', 'speed', 'dexterity', 'temper', 'drive', 'track', 'scope', 'recovery', 'potency'];
+    public const BANDS = ['exceptional' => 85, 'very_good' => 70, 'useful' => 55, 'ordinary' => 40, 'weak' => 0];
 
-    public static function write(array $h, string $level): string
+    /** @var array<string,string[]>|null "topic|band" => lines */
+    private static ?array $lines = null;
+
+    /** Every topic with a short explanation, in the order a report uses them (for the admin page). */
+    public static function topics(): array
+    {
+        $topics = [
+            'style_front' => 'Running style: front runner', 'style_steady' => 'Running style: steady', 'style_close' => 'Running style: closer',
+            'surface_dirt' => 'Prefers dirt', 'surface_turf' => 'Prefers turf', 'surface_steeplechase' => 'Prefers steeplechase',
+            'distance_sprint' => 'Endurance under 7 f', 'distance_mile' => 'Endurance 7 to 9 f', 'distance_classic' => 'Endurance 9 to 11 f',
+            'distance_route' => 'Endurance 11 to 16 f', 'distance_marathon' => 'Endurance 16 f and over',
+        ];
+        foreach (self::STATS as $s) {
+            $topics["stat_$s"] = ucfirst($s);
+        }
+        return $topics;
+    }
+
+    public static function write(Db $db, array $h, string $level): string
     {
         $cfg = self::LEVELS[$level];
-        $stats = array_keys(self::PHRASES);
+        $stats = self::STATS;
         shuffle($stats);
         $stats = array_slice($stats, 0, $cfg['stats']);
 
-        $lines = [];
-        $lines[] = self::styleLine($h['running_style']) . ' Prefers ' . self::surfaceWord($h['surface_pref']) . '.';
-        $lines[] = self::distanceLine((float) $h['endurance_f'] + self::noise($cfg['error'] / 6));
-
+        $out = [];
+        $out[] = self::pick($db, 'style_' . $h['running_style']);
+        $out[] = self::pick($db, 'surface_' . $h['surface_pref']);
+        $out[] = self::pick($db, self::distanceTopic((float) $h['endurance_f'] + self::noise($cfg['error'] / 6)));
         foreach ($stats as $stat) {
-            $judged = (int) $h[$stat] + (int) round(self::noise($cfg['error']));
-            $lines[] = ucfirst(self::band($judged)) . ' ' . self::PHRASES[$stat] . '.';
+            $judged = (int) $h["stat_$stat"] + (int) round(self::noise($cfg['error']));
+            $out[] = self::pick($db, "stat_$stat", self::band($judged));
         }
-        return implode("\n", $lines);
+        $out = array_filter($out, fn ($l) => $l !== null);
+        return str_replace('{name}', (string) ($h['name'] ?? 'This horse'), implode("\n", $out));
+    }
+
+    /**
+     * Saves the admin page: edited lines (an emptied line is removed) and new ones.
+     * @param array<int,string> $edits id => text
+     * @param array<string,string> $added "topic|band" => text
+     */
+    public static function saveLines(Db $db, array $edits, array $added): int
+    {
+        $topics = self::topics();
+        $changes = 0;
+        $db->transaction(function (Db $db) use ($edits, $added, $topics, &$changes) {
+            foreach ($edits as $id => $text) {
+                $text = trim(preg_replace('/\s+/', ' ', (string) $text));
+                if ($text === '') {
+                    $changes += $db->run('DELETE FROM qp_report_lines WHERE id = ?', [(int) $id])->rowCount();
+                } else {
+                    $changes += $db->run('UPDATE qp_report_lines SET line = ? WHERE id = ?', [mb_substr($text, 0, 255), (int) $id])->rowCount();
+                }
+            }
+            foreach ($added as $slot => $text) {
+                $text = trim(preg_replace('/\s+/', ' ', (string) $text));
+                [$topic, $band] = array_pad(explode('|', (string) $slot, 2), 2, '');
+                $isStat = str_starts_with($topic, 'stat_');
+                if ($text === '' || !isset($topics[$topic]) || ($isStat && !isset(self::BANDS[$band]))) {
+                    continue;
+                }
+                $db->run('INSERT INTO qp_report_lines (topic, band, line) VALUES (?, ?, ?)', [$topic, $isStat ? $band : null, mb_substr($text, 0, 255)]);
+                $changes++;
+            }
+        });
+        self::$lines = null;
+        return $changes;
+    }
+
+    private static function pick(Db $db, string $topic, ?string $band = null): ?string
+    {
+        if (self::$lines === null) {
+            self::$lines = [];
+            foreach ($db->all('SELECT topic, band, line FROM qp_report_lines') as $r) {
+                self::$lines[$r['topic'] . '|' . $r['band']][] = $r['line'];
+            }
+        }
+        $choices = self::$lines["$topic|$band"] ?? [];
+        return $choices ? $choices[array_rand($choices)] : null;
     }
 
     private static function band(int $v): string
     {
-        return match (true) {
-            $v >= 85 => 'exceptional',
-            $v >= 70 => 'very good',
-            $v >= 55 => 'useful',
-            $v >= 40 => 'ordinary',
-            default  => 'weak',
-        };
+        foreach (self::BANDS as $band => $min) {
+            if ($v >= $min) {
+                return $band;
+            }
+        }
+        return 'weak';
     }
 
-    private static function styleLine(string $style): string
-    {
-        return match ($style) {
-            'front'  => 'Likes to go to the front and set the pace.',
-            'close'  => 'Likes to sit back and make one big run late.',
-            default  => 'Settles mid-pack and runs an even race.',
-        };
-    }
-
-    private static function surfaceWord(string $s): string
-    {
-        return match ($s) {
-            'turf'         => 'the turf',
-            'steeplechase' => 'jumping',
-            default        => 'the dirt',
-        };
-    }
-
-    private static function distanceLine(float $f): string
+    private static function distanceTopic(float $f): string
     {
         return match (true) {
-            $f < 7    => 'Looks like a sprinter.',
-            $f < 9    => 'Should handle a mile or so.',
-            $f < 11   => 'Should get a mile and a quarter.',
-            $f < 16   => 'Will stay a long way.',
-            default   => 'Built to stay all day over jumps.',
+            $f < 7  => 'distance_sprint',
+            $f < 9  => 'distance_mile',
+            $f < 11 => 'distance_classic',
+            $f < 16 => 'distance_route',
+            default => 'distance_marathon',
         };
     }
 

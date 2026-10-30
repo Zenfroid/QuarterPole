@@ -141,7 +141,7 @@ final class Breeding
                 );
                 $foalId = $db->lastId();
                 if ($age >= 2) {
-                    $db->run("INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, 'basic', ?)", [$foalId, TrainerNotes::write($row, 'basic')]);
+                    $db->run("INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, 'basic', ?)", [$foalId, TrainerNotes::write($db, $row, 'basic')]);
                 }
             }
 
