@@ -25,7 +25,7 @@ final class Maturity
             // Grows from START at age 2 to 1.0 at peak age; training closes the gap faster.
             $span = max(0.5, $peak - 2);
             $base = self::START + (1 - self::START) * max(0, $exact - 2) / $span;
-            $trained = (int) $h['training_progress'] / 100;
+            $trained = (float) $h['training_progress'] / 100;
             return min(1.0, $base + (1 - $base) * $trained);
         }
         $pastPeak = $exact - ($peak + $peakYears);

@@ -30,7 +30,7 @@ final class Training
             }
             $db->run(
                 'UPDATE qp_horses SET last_trained_on = ?, training_progress = LEAST(100, training_progress + ?) WHERE id = ?',
-                [$realToday, $this->settings->int('training_progress_per_session'), $horseId]
+                [$realToday, $this->settings->float('training_progress_per_session'), $horseId]
             );
 
             $msg = $h['name'] . ' had a good workout.';
