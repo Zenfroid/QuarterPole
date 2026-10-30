@@ -14,6 +14,7 @@
   <nav>
     <?php if ($member): ?>
       <?php if ($stable): ?>
+        <a href="?page=studs">Stallions</a>
         <span class="stat"><?= e(money($stable['cash'])) ?></span>
         <span class="stat"><?= (int) $stable['creation_credits'] ?> credits</span>
       <?php endif ?>
