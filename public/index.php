@@ -11,6 +11,7 @@ use QuarterPole\HorseActions;
 use QuarterPole\HorseFactory;
 use QuarterPole\Pedigree;
 use QuarterPole\Race\Entries;
+use QuarterPole\Race\Jockeys;
 use QuarterPole\Race\Stakes;
 use QuarterPole\Stable;
 use QuarterPole\TrainerNotes;
@@ -231,6 +232,22 @@ try {
                 }
                 $trackList = $db->all('SELECT * FROM qp_tracks ORDER BY active DESC, name');
                 View::render('admin_stakes', $shared + ['stakes' => $all, 'editing' => $editing, 'trackList' => $trackList, 'adding' => isset($_GET['add'])]);
+                break;
+            }
+
+            if ($page === 'admin-jockeys') {
+                if (!$member->isAdmin) {
+                    http_response_code(403);
+                    View::render('not_found', $shared);
+                    break;
+                }
+                $jockeysSvc = new Jockeys($db);
+                if ($isPost) {
+                    $n = $jockeysSvc->save((array) ($_POST['name'] ?? []), (array) ($_POST['active'] ?? []), (array) ($_POST['add'] ?? []));
+                    View::flash($n ? "Saved $n change" . ($n === 1 ? '' : 's') . '.' : 'Nothing changed.');
+                    View::redirect('?page=admin-jockeys');
+                }
+                View::render('admin_jockeys', $shared + ['jockeys' => $jockeysSvc->all(), 'maxField' => $gameSettings->int('max_field_size')]);
                 break;
             }
 

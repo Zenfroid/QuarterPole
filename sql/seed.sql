@@ -204,9 +204,14 @@ INSERT INTO qp_stakes (name, track_id, series_id, series_leg, race_level, surfac
 ('Heather Cup', (SELECT id FROM qp_tracks WHERE name = 'Boudicca Park'), (SELECT id FROM qp_series WHERE badge_code = 'triple_steeplechase'), 3, 'g1', 'steeplechase', 32, 4, NULL, 'open', 9, 8, 'sun', 300000);
 
 -- ---------------------------------------------------------------
--- Jockeys: a small pool, all identical for now
+-- Jockeys: all identical for now. Admins add, rename and retire them on the Jockeys page.
 -- ---------------------------------------------------------------
 INSERT INTO qp_jockeys (name, skill) VALUES
 ('A. Moreno', 50), ('B. Kincaid', 50), ('C. Delacroix', 50), ('D. Okafor', 50),
 ('E. Lindqvist', 50), ('F. Ramirez', 50), ('G. Whitlock', 50), ('H. Nakamura', 50),
-('I. Castellano', 50), ('J. Byrne', 50), ('K. Adeyemi', 50), ('L. Sorensen', 50);
+('I. Castellano', 50), ('J. Byrne', 50), ('K. Adeyemi', 50), ('L. Sorensen', 50),
+('M. Fitzgerald', 50), ('N. Haddad', 50), ('O. Petrova', 50), ('P. Gallagher', 50),
+('R. Ortega', 50), ('S. Mbeki', 50), ('T. Halloran', 50), ('V. Rossi', 50),
+('W. Achterberg', 50), ('Y. Tanaka', 50), ('Z. Novak', 50), ('A. Beaumont', 50),
+('C. MacLeod', 50), ('D. Quintero', 50), ('E. Varga', 50), ('G. Oyelaran', 50),
+('J. Thibodeaux', 50), ('L. Harrington', 50);

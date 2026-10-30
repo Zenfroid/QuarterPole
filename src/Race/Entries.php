@@ -105,7 +105,7 @@ final class Entries
             }
             $stable = $db->one('SELECT * FROM qp_stables WHERE member_id = ?', [$memberId]);
             $fee = $this->fee($race, $stable);
-            $jockey = (int) $db->value('SELECT id FROM qp_jockeys ORDER BY RAND() LIMIT 1');
+            $jockey = Jockeys::pick($db, $raceId);
             $db->run('INSERT INTO qp_entries (race_id, horse_id, owner_id, jockey_id, fee_paid) VALUES (?, ?, ?, ?, ?)',
                 [$raceId, $horseId, $memberId, $jockey, $fee]);
             if ($race['race_level'] === 'claiming') {

@@ -6,7 +6,7 @@ $form = $editing ?? ($adding ? ['id' => '', 'name' => '', 'track_id' => 0, 'race
 $opt = fn ($v, $cur) => '<option value="' . e($v) . '"' . ((string) $v === (string) $cur ? ' selected' : '') . '>';
 ?>
 <section>
-  <p class="muted"><a href="?page=admin-settings">Game settings</a> · <a href="?page=admin-reports">Trainer's report wording</a> · Stakes calendar</p>
+  <p class="muted"><a href="?page=admin-settings">Game settings</a> · <a href="?page=admin-reports">Trainer's report wording</a> · Stakes calendar · <a href="?page=admin-jockeys">Jockeys</a></p>
   <div class="heading-row">
     <h1>Stakes calendar</h1>
     <a class="button" href="?page=admin-stakes&amp;add=1">Add a stakes race</a>

@@ -240,7 +240,8 @@ CREATE TABLE qp_tracks (
 CREATE TABLE qp_jockeys (
   id     SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   name   VARCHAR(60) NOT NULL,
-  skill  TINYINT UNSIGNED NOT NULL DEFAULT 50
+  skill  TINYINT UNSIGNED NOT NULL DEFAULT 50,
+  active TINYINT(1) NOT NULL DEFAULT 1   -- 0 = no new rides; kept so old charts keep the name
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Named series: the five Triples and the Breeders' Stakes Series.
