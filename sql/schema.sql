@@ -51,7 +51,7 @@ CREATE TABLE qp_transactions (
   amount        BIGINT       NOT NULL,           -- positive = in, negative = out
   balance_after BIGINT       NOT NULL,
   kind          ENUM('start','purse','entry_fee','stud_fee_in','stud_fee_out','sale','purchase',
-                     'claim_in','claim_out','interest','genetic_test','trainer_report','admin') NOT NULL,
+                     'claim_in','claim_out','refund','interest','genetic_test','trainer_report','admin') NOT NULL,
   ref_table     VARCHAR(32)  NULL,               -- e.g. 'qp_races'
   ref_id        BIGINT UNSIGNED NULL,
   note          VARCHAR(255) NULL,
@@ -278,12 +278,27 @@ CREATE TABLE qp_entries (
   margin_text     VARCHAR(16)  NULL,               -- 'nose','head','neck','1 1/2'...
   final_time      DECIMAL(6,2) NULL,               -- seconds
   earnings        INT UNSIGNED NOT NULL DEFAULT 0, -- shown for ghosts, paid only to players
+  fee_paid        INT UNSIGNED NOT NULL DEFAULT 0, -- refunded on a scratch
   claimed_by      INT UNSIGNED NULL,
   UNIQUE KEY uq_entry (race_id, horse_id),
   KEY ix_entry_horse (horse_id),
   CONSTRAINT fk_entry_race   FOREIGN KEY (race_id)   REFERENCES qp_races(id),
   CONSTRAINT fk_entry_horse  FOREIGN KEY (horse_id)  REFERENCES qp_horses(id),
   CONSTRAINT fk_entry_jockey FOREIGN KEY (jockey_id) REFERENCES qp_jockeys(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Claims put in on horses in claiming races. Cash is held when the claim is made;
+-- after the race one claim wins (a shake if several) and the rest are refunded.
+CREATE TABLE qp_claims (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  entry_id    INT UNSIGNED NOT NULL,
+  member_id   INT UNSIGNED NOT NULL,
+  amount      INT UNSIGNED NOT NULL,
+  status      ENUM('pending','won','lost','refunded') NOT NULL DEFAULT 'pending',
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_claim (entry_id, member_id),
+  CONSTRAINT fk_claim_entry  FOREIGN KEY (entry_id)  REFERENCES qp_entries(id),
+  CONSTRAINT fk_claim_member FOREIGN KEY (member_id) REFERENCES qp_stables(member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Points of call for the result chart.

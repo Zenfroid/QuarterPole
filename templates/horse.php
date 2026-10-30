@@ -1,4 +1,4 @@
-<?php use QuarterPole\Csrf; use QuarterPole\GameClock; use QuarterPole\Horse; use QuarterPole\Maturity; use QuarterPole\Training;
+<?php use QuarterPole\Race\Calls; use QuarterPole\Race\Entries; use QuarterPole\Csrf; use QuarterPole\GameClock; use QuarterPole\Horse; use QuarterPole\Maturity; use QuarterPole\Training;
 $age = GameClock::ageOn($horse['birth_game_date'], $today);
 $maturity = Maturity::factor($horse, $age, Maturity::yearFraction($today), $peakYears);
 $labels = ['basic' => 'Basic trainer', 'experienced' => 'Experienced trainer', 'expert' => 'Expert trainer'];
@@ -35,6 +35,10 @@ $action = function (string $name, string $label) use ($horse): string {
       <h2>Record</h2>
       <p><?= (int) $horse['starts'] ?> starts: <?= (int) $horse['wins'] ?> wins, <?= (int) $horse['places'] ?> seconds, <?= (int) $horse['shows'] ?> thirds</p>
       <p>Earnings: <?= e(money($horse['earnings'])) ?></p>
+      <?php if ($isOwner && $horse['status'] === 'active'): ?>
+        <p>Energy: <?= (int) $horse['energy'] ?>%</p>
+        <a class="button" href="?page=races">Find a race</a>
+      <?php endif ?>
     </div>
 
     <div class="panel">
@@ -48,6 +52,29 @@ $action = function (string $name, string $label) use ($horse): string {
       <p class="muted">Inbreeding (COI, 5 generations): <?= number_format((float) $horse['coi'] * 100, 2) ?>%</p>
     </div>
   </div>
+
+  <?php if ($raceRecord): ?>
+    <div class="panel">
+      <h2>Races</h2>
+      <div class="table-wrap">
+        <table class="list">
+          <thead><tr><th>Date</th><th>Race</th><th>Track</th><th>Distance</th><th>Finish</th><th>Earned</th></tr></thead>
+          <tbody>
+          <?php foreach ($raceRecord as $r): ?>
+            <tr>
+              <td><?= e(GameClock::label(new DateTimeImmutable($r['game_date']))) ?></td>
+              <td><a href="?page=race&amp;id=<?= (int) $r['race_id'] ?>"><?= e(Entries::raceLabel($r)) ?></a></td>
+              <td><?= e($r['track_name']) ?></td>
+              <td><?= e(Calls::distanceLabel((float) $r['distance_f'])) ?> <?= e($r['surface']) ?></td>
+              <td><?= match ($r['status']) { 'run' => e(ordinal((int) $r['finish_position'])) . ($r['margin_text'] ? ' (' . e($r['margin_text']) . ')' : ''), 'open' => 'Entered', default => e(ucfirst($r['status'])) } ?></td>
+              <td class="num"><?= $r['status'] === 'run' ? e(number_format((int) $r['earnings'])) : '' ?></td>
+            </tr>
+          <?php endforeach ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <?php endif ?>
 
   <?php if ($horse['genetics_tested']): ?>
     <div class="panel">

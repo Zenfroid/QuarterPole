@@ -25,6 +25,9 @@ final class HorseActions
             if ($h['status'] !== 'active') {
                 throw new UserError('Only active horses can be retired to breeding.');
             }
+            if ($db->value("SELECT 1 FROM qp_entries e JOIN qp_races r ON r.id = e.race_id WHERE e.horse_id = ? AND r.status = 'open'", [$horseId])) {
+                throw new UserError($h['name'] . ' is entered in a race. Scratch first, then retire.');
+            }
             $db->run("UPDATE qp_horses SET status = 'retired' WHERE id = ?", [$horseId]);
             return $h['name'] . ' is retired to breeding.';
         });
