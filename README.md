@@ -24,6 +24,7 @@ The design decisions live in the design doc: https://claude.ai/artifact/1UuQMPLW
 - Naming a stable, which grants starting Cash and creation credits (logged in the Cash ledger).
 - Creating foundation horses with a credit: random stats, running style, peak age, Endurance by surface and color genetics, plus a basic trainer's report.
 - The stable page (cards, 12 per page) and the horse page (record, parents, COI, trainer's notes for the owner).
+- Training: a Train button on each card and horse page, once per horse per real day. Horses grow from 75% of peak at age 2 to full peak at their peak age; each session closes 2% of the remaining gap (setting `training_progress_per_session`). They hold peak for 2 game years, then decline. Training earns a flat 1 AMI per real day, and AMI turns into creation credits automatically every 50 points.
 
 ## How the tables fit together
 

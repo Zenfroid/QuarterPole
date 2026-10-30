@@ -8,6 +8,7 @@ use QuarterPole\Csrf;
 use QuarterPole\Horse;
 use QuarterPole\HorseFactory;
 use QuarterPole\Stable;
+use QuarterPole\Training;
 use QuarterPole\UserError;
 use QuarterPole\View;
 
@@ -59,7 +60,8 @@ try {
                 'sire' => $horse['sire_id'] ? Horse::find($db, (int) $horse['sire_id']) : null,
                 'dam'  => $horse['dam_id'] ? Horse::find($db, (int) $horse['dam_id']) : null,
             ];
-            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'parents'));
+            $peakYears = $settings->int('peak_years');
+            View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'parents', 'peakYears'));
             break;
 
         default:
@@ -76,6 +78,12 @@ try {
                 }
                 View::render('stable_setup', $shared);
                 break;
+            }
+
+            if ($page === 'train' && $isPost) {
+                $horseId = (int) ($_POST['horse_id'] ?? 0);
+                View::flash((new Training($db, $settings))->train($member->id, $horseId, date('Y-m-d')));
+                View::redirect(($_POST['back'] ?? '') === 'stable' ? '?p=' . max(1, (int) ($_POST['p'] ?? 1)) : '?page=horse&id=' . $horseId);
             }
 
             if ($page === 'create-horse') {
@@ -100,5 +108,8 @@ try {
 } catch (UserError $err) {
     // Show the problem and return the player to the form they came from.
     View::flash($err->getMessage(), 'error');
-    View::redirect('?page=' . rawurlencode($page === 'create-stable' ? 'home' : $page));
+    View::redirect(match ($page) {
+        'create-stable', 'train' => '?',
+        default => '?page=' . rawurlencode($page),
+    });
 }

@@ -1,4 +1,4 @@
-<?php use QuarterPole\GameClock; use QuarterPole\Horse; ?>
+<?php use QuarterPole\Csrf; use QuarterPole\GameClock; use QuarterPole\Horse; use QuarterPole\Training; $realToday = date('Y-m-d'); ?>
 <section>
   <div class="heading-row">
     <h1><?= e($stable['stable_name']) ?></h1>
@@ -10,12 +10,23 @@
   <?php else: ?>
     <div class="cards">
       <?php foreach ($list['rows'] as $h): $age = GameClock::ageOn($h['birth_game_date'], $today); ?>
-        <a class="card" href="?page=horse&amp;id=<?= (int) $h['id'] ?>">
-          <strong><?= e($h['name']) ?></strong>
+        <div class="card">
+          <a href="?page=horse&amp;id=<?= (int) $h['id'] ?>"><strong><?= e($h['name']) ?></strong></a>
           <span><?= $age ?>yo <?= e(Horse::sexLabel($h, $age)) ?></span>
           <span><?= e($h['color_name']) ?></span>
           <span class="muted"><?= (int) $h['starts'] ?> starts, <?= (int) $h['wins'] ?> wins<?= $h['status'] === 'retired' ? ' · Retired' : '' ?></span>
-        </a>
+          <?php if (Training::canTrain($h, $realToday)): ?>
+            <form method="post" action="?page=train" class="card-action">
+              <?= Csrf::field() ?>
+              <input type="hidden" name="horse_id" value="<?= (int) $h['id'] ?>">
+              <input type="hidden" name="back" value="stable">
+              <input type="hidden" name="p" value="<?= (int) $p ?>">
+              <button type="submit" class="small">Train</button>
+            </form>
+          <?php elseif ($h['status'] === 'active'): ?>
+            <span class="muted card-action">Trained today</span>
+          <?php endif ?>
+        </div>
       <?php endforeach ?>
     </div>
     <?php if ($list['pages'] > 1): ?>

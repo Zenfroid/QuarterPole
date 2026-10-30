@@ -13,6 +13,8 @@ return [
     'auth' => 'dev',
     // Path on disk to SMF's SSI.php, used when auth is 'smf'.
     'smf_ssi_path' => __DIR__ . '/public/Forum/SSI.php',
+    // Real-world day boundaries (training, interest) use this time zone.
+    'timezone' => 'America/New_York',
     // Shown in page titles and the header.
     'site_name' => 'Quarter Pole',
 ];
