@@ -3,9 +3,9 @@ $age = GameClock::ageOn($horse['birth_game_date'], $today);
 $maturity = Maturity::factor($horse, $age, Maturity::yearFraction($today), $peakYears);
 $labels = ['basic' => 'Basic trainer', 'experienced' => 'Experienced trainer', 'expert' => 'Expert trainer'];
 $isStallion = $horse['sex'] === 'M' && !$horse['gelded'];
-$link = fn (?array $h) => $h ? '<a href="?page=horse&amp;id=' . (int) $h['id'] . '">' . e($h['name']) . '</a>' : '<span class="muted">Foundation</span>';
+$link = fn (?array $h) => $h ? '<a href="horse.php?id=' . (int) $h['id'] . '">' . e($h['name']) . '</a>' : '<span class="muted">Foundation</span>';
 $action = function (string $name, string $label) use ($horse): string {
-    return '<form method="post" action="?page=horse-action" class="inline">' . Csrf::field()
+    return '<form method="post" action="horse_action.php" class="inline">' . Csrf::field()
         . '<input type="hidden" name="horse_id" value="' . (int) $horse['id'] . '">'
         . '<input type="hidden" name="action" value="' . e($name) . '">'
         . '<button type="submit">' . e($label) . '</button></form>';
@@ -26,7 +26,7 @@ $action = function (string $name, string $label) use ($horse): string {
   <?php if ($isStallion && $horse['status'] === 'retired' && $horse['stud_fee'] !== null): ?>
     <div class="panel highlight">
       Standing at stud for <strong><?= e(money($horse['stud_fee'])) ?></strong>.
-      <?php if ($stable): ?><a class="button" href="?page=breed&amp;sire=<?= (int) $horse['id'] ?>">Book a mare</a><?php endif ?>
+      <?php if ($stable): ?><a class="button" href="breed.php?sire=<?= (int) $horse['id'] ?>">Book a mare</a><?php endif ?>
     </div>
   <?php endif ?>
 
@@ -37,7 +37,7 @@ $action = function (string $name, string $label) use ($horse): string {
       <p>Earnings: <?= e(money($horse['earnings'])) ?></p>
       <?php if ($isOwner && $horse['status'] === 'active'): ?>
         <p>Energy: <?= (int) $horse['energy'] ?>%</p>
-        <a class="button" href="?page=races">Find a race</a>
+        <a class="button" href="races.php">Find a race</a>
       <?php endif ?>
     </div>
 
@@ -63,7 +63,7 @@ $action = function (string $name, string $label) use ($horse): string {
           <?php foreach ($raceRecord as $r): ?>
             <tr>
               <td><?= e(GameClock::label(new DateTimeImmutable($r['game_date']))) ?></td>
-              <td><a href="?page=race&amp;id=<?= (int) $r['race_id'] ?>"><?= e(Entries::raceLabel($r)) ?></a></td>
+              <td><a href="race.php?id=<?= (int) $r['race_id'] ?>"><?= e(Entries::raceLabel($r)) ?></a></td>
               <td><?= e($r['track_name']) ?></td>
               <td><?= e(Calls::distanceLabel((float) $r['distance_f'])) ?> <?= e($r['surface']) ?></td>
               <td><?= match ($r['status']) { 'run' => e(ordinal((int) $r['finish_position'])) . ($r['margin_text'] ? ' (' . e($r['margin_text']) . ')' : ''), 'open' => 'Entered', default => e(ucfirst($r['status'])) } ?></td>
@@ -91,7 +91,7 @@ $action = function (string $name, string $label) use ($horse): string {
       <h2>Training</h2>
       <p><?= e(Maturity::label($maturity, $age, (int) $horse['peak_age'])) ?></p>
       <?php if (Training::canTrain($horse, date('Y-m-d'))): ?>
-        <form method="post" action="?page=train">
+        <form method="post" action="train.php">
           <?= Csrf::field() ?>
           <input type="hidden" name="horse_id" value="<?= (int) $horse['id'] ?>">
           <button type="submit">Train</button>
@@ -111,10 +111,10 @@ $action = function (string $name, string $label) use ($horse): string {
           <?= $action('test', 'Genetic test (' . money($testCost) . ')') ?>
         <?php endif ?>
         <?php if ($horse['sex'] === 'F' && $horse['status'] === 'retired'): ?>
-          <a class="button" href="?page=studs">Find a stallion</a>
+          <a class="button" href="stallions.php">Find a stallion</a>
         <?php endif ?>
         <?php if ($isStallion && $horse['status'] === 'retired'): ?>
-          <a class="button" href="?page=breed&amp;sire=<?= (int) $horse['id'] ?>">Breed to one of your mares</a>
+          <a class="button" href="breed.php?sire=<?= (int) $horse['id'] ?>">Breed to one of your mares</a>
         <?php endif ?>
       </div>
       <?php if ($horse['status'] === 'active'): ?>
@@ -134,7 +134,7 @@ $action = function (string $name, string $label) use ($horse): string {
 
       <?php if ($isStallion && $horse['status'] === 'retired'): ?>
         <h3>Stud settings</h3>
-        <form method="post" action="?page=horse-action">
+        <form method="post" action="horse_action.php">
           <?= Csrf::field() ?>
           <input type="hidden" name="horse_id" value="<?= (int) $horse['id'] ?>">
           <input type="hidden" name="action" value="stud">
@@ -180,7 +180,7 @@ $action = function (string $name, string $label) use ($horse): string {
       <h2>Offspring</h2>
       <ul class="plain">
         <?php foreach ($offspring as $o): ?>
-          <li><a href="?page=horse&amp;id=<?= (int) $o['id'] ?>"><?= e($o['name']) ?></a> <span class="muted">born Year <?= (int) substr($o['birth_game_date'], 0, 4) - GameClock::YEAR_OFFSET ?></span></li>
+          <li><a href="horse.php?id=<?= (int) $o['id'] ?>"><?= e($o['name']) ?></a> <span class="muted">born Year <?= (int) substr($o['birth_game_date'], 0, 4) - GameClock::YEAR_OFFSET ?></span></li>
         <?php endforeach ?>
       </ul>
     </div>

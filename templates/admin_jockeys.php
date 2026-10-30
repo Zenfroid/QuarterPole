@@ -2,13 +2,13 @@
 $riding = count(array_filter($jockeys, fn ($j) => $j['active']));
 ?>
 <section>
-  <p class="muted"><a href="?page=admin">Admin panel</a> › Jockeys</p>
+  <p class="muted"><a href="admin.php">Admin panel</a> › Jockeys</p>
   <h1>Jockeys</h1>
   <p class="muted">Each horse in a race gets a different jockey, picked at random from those riding. All jockeys ride equally well for now. Untick Riding to retire a jockey: they get no new rides, and old race charts keep their name.</p>
   <?php if ($riding < $maxField): ?>
     <p class="warn">Only <?= $riding ?> jockeys are riding, but a race can have <?= $maxField ?> horses, so some jockeys will ride twice in a full race.</p>
   <?php endif ?>
-  <form method="post" action="?page=admin-jockeys" class="panel">
+  <form method="post" action="admin_jockeys.php" class="panel">
     <?= Csrf::field() ?>
     <div class="table-wrap">
       <table class="list">

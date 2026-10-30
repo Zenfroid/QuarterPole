@@ -6,15 +6,15 @@ $form = $editing ?? ($adding ? ['id' => '', 'name' => '', 'track_id' => 0, 'race
 $opt = fn ($v, $cur) => '<option value="' . e($v) . '"' . ((string) $v === (string) $cur ? ' selected' : '') . '>';
 ?>
 <section>
-  <p class="muted"><a href="?page=admin">Admin panel</a> › Stakes calendar</p>
+  <p class="muted"><a href="admin.php">Admin panel</a> › Stakes calendar</p>
   <div class="heading-row">
     <h1>Stakes calendar</h1>
-    <a class="button" href="?page=admin-stakes&amp;add=1">Add a stakes race</a>
+    <a class="button" href="admin_stakes.php?add=1">Add a stakes race</a>
   </div>
   <p class="muted">Named stakes run every game year, on the first race day of the chosen kind on or after their date. Other graded stakes fill each stakes day with plain names until you name more here. Races at inactive tracks wait until the track opens.</p>
 
   <?php if ($form): ?>
-    <form method="post" action="?page=admin-stakes" class="panel stakes-form">
+    <form method="post" action="admin_stakes.php" class="panel stakes-form">
       <?= Csrf::field() ?>
       <input type="hidden" name="id" value="<?= e($form['id']) ?>">
       <h2><?= $form['id'] === '' ? 'Add a stakes race' : 'Edit ' . e($form['name']) ?></h2>
@@ -49,7 +49,7 @@ $opt = fn ($v, $cur) => '<option value="' . e($v) . '"' . ((string) $v === (stri
       </div>
       <label class="check"><input type="checkbox" name="homebred_only" value="1" <?= $form['homebred_only'] ? 'checked' : '' ?>> Homebreds only</label>
       <label class="check"><input type="checkbox" name="active" value="1" <?= $form['active'] ? 'checked' : '' ?>> On the calendar (untick to pause it)</label>
-      <button type="submit">Save</button> <a href="?page=admin-stakes">Cancel</a>
+      <button type="submit">Save</button> <a href="admin_stakes.php">Cancel</a>
     </form>
   <?php endif ?>
 
@@ -66,7 +66,7 @@ $opt = fn ($v, $cur) => '<option value="' . e($v) . '"' . ((string) $v === (stri
           <td><?= e(Calls::distanceLabel((float) $st['distance_f'])) ?> <?= e($st['surface']) ?></td>
           <td><?= e(Entries::conditions($st)) ?><?= $st['homebred_only'] ? ', homebreds' : '' ?><?= $st['active'] ? '' : ' (paused)' ?></td>
           <td class="num"><?= e(number_format((int) $st['purse'])) ?></td>
-          <td><a href="?page=admin-stakes&amp;edit=<?= (int) $st['id'] ?>">Edit</a></td>
+          <td><a href="admin_stakes.php?edit=<?= (int) $st['id'] ?>">Edit</a></td>
         </tr>
       <?php endforeach ?>
       </tbody>
