@@ -18,7 +18,7 @@ if (PHP_SAPI !== 'cli') {
 require dirname(__DIR__) . '/src/bootstrap.php';
 
 $today = date('Y-m-d');
-$schedule = new Schedule($db, $settings, $clock);
+$schedule = new Schedule($db, $gameSettings, $clock);
 
 if (in_array('--schedule-only', $argv, true)) {
     printf("Added %d races.\n", $schedule->fill($today));
@@ -31,13 +31,13 @@ if ($last !== null && substr((string) $last, 0, 10) === $today) {
     exit;
 }
 
-$runner = new Runner($db, $settings, $clock);
+$runner = new Runner($db, $gameSettings, $clock);
 $done = $runner->runDue($today);
 printf("Races run: %d, cancelled (no player horses): %d\n", $done['run'], $done['cancelled']);
 
 $runner->recoverEnergy();
 $db->run('UPDATE qp_game_clock SET game_date = DATE_ADD(game_date, INTERVAL ? DAY), last_tick_at = NOW() WHERE id = 1',
-    [$settings->int('game_speed')]);
+    [$gameSettings->int('game_speed')]);
 echo 'Game date is now ' . $clock->today()->format('Y-m-d') . ".\n";
 
 // Foals that have just turned 2 get their free basic trainer's notes.

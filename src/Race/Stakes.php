@@ -54,6 +54,9 @@ final class Stakes
         if ($ageMin < 2 || $ageMin > 10 || ($ageMax !== null && $ageMax < $ageMin)) {
             throw new UserError('Check the ages: youngest 2 or more, oldest blank for "and up".');
         }
+        if ($surface === 'steeplechase' && $ageMin < 4) {
+            throw new UserError('Steeplechases are for 4-year-olds and up.');
+        }
         $sex = (string) ($in['sex_rule'] ?? 'open');
         if (!in_array($sex, ['open', 'colts_geldings', 'fillies_mares'], true)) {
             $sex = 'open';

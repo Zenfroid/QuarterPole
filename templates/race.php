@@ -105,7 +105,7 @@ $post = function (string $action, array $fields, string $label) use ($race): str
         <h2>Enter a horse</h2>
         <?php $ok = array_filter($candidates, fn ($h) => $h['why_not'] === null); ?>
         <?php if (!$ok): ?>
-          <p class="muted">None of your active horses fit this race.</p>
+          <p class="muted">None of your active <?= e($race['surface']) ?> horses fit this race.</p>
         <?php else: ?>
           <form method="post" action="?page=race-enter">
             <?= Csrf::field() ?>
@@ -113,7 +113,7 @@ $post = function (string $action, array $fields, string $label) use ($race): str
             <label>Horse
               <select name="horse_id">
                 <?php foreach ($ok as $h): ?>
-                  <option value="<?= (int) $h['id'] ?>"><?= e($h['name']) ?> (<?= e($h['surface_pref']) ?>, energy <?= (int) $h['energy'] ?>%)</option>
+                  <option value="<?= (int) $h['id'] ?>"><?= e($h['name']) ?> (energy <?= (int) $h['energy'] ?>%)</option>
                 <?php endforeach ?>
               </select>
             </label>

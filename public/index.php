@@ -11,6 +11,7 @@ use QuarterPole\HorseActions;
 use QuarterPole\HorseFactory;
 use QuarterPole\Pedigree;
 use QuarterPole\Race\Entries;
+use QuarterPole\Race\Jockeys;
 use QuarterPole\Race\Stakes;
 use QuarterPole\Stable;
 use QuarterPole\TrainerNotes;
@@ -18,7 +19,11 @@ use QuarterPole\Training;
 use QuarterPole\UserError;
 use QuarterPole\View;
 
-require dirname(__DIR__) . '/src/bootstrap.php';
+// The game's code sits beside the web root: in ../quarterpole/ on a host (next to public_html),
+// or in .. when running from the repository.
+require is_file(dirname(__DIR__) . '/quarterpole/src/bootstrap.php')
+    ? dirname(__DIR__) . '/quarterpole/src/bootstrap.php'
+    : dirname(__DIR__) . '/src/bootstrap.php';
 
 $page   = $_GET['page'] ?? 'home';
 $isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
@@ -27,7 +32,7 @@ if ($isPost) {
 }
 
 $member  = $auth->member();
-$stables = new Stable($db, $settings);
+$stables = new Stable($db, $gameSettings);
 $stable  = $member ? $stables->find($member->id) : null;
 $shared  = ['config' => $config, 'member' => $member, 'stable' => $stable, 'auth' => $auth, 'today' => $clock->today()];
 
@@ -63,11 +68,11 @@ try {
                 [$horse['id']]
             );
             $tree = (new Pedigree($db))->tree($horse, 3);
-            $peakYears = $settings->int('peak_years');
+            $peakYears = $gameSettings->int('peak_years');
             $offspring = $db->all('SELECT id, name, birth_game_date FROM qp_horses WHERE sire_id = ? OR dam_id = ? ORDER BY birth_game_date DESC, name', [$horse['id'], $horse['id']]);
-            $testCost = $settings->int('genetic_test_cost');
-            $reportCosts = ['experienced' => $settings->int('report_cost_experienced'), 'expert' => $settings->int('report_cost_expert')];
-            $trpCredits = $settings->int('trp_credit_refund');
+            $testCost = $gameSettings->int('genetic_test_cost');
+            $reportCosts = ['experienced' => $gameSettings->int('report_cost_experienced'), 'expert' => $gameSettings->int('report_cost_expert')];
+            $trpCredits = $gameSettings->int('trp_credit_refund');
             $raceRecord = $db->all(
                 'SELECT e.finish_position, e.margin_text, e.earnings, r.id AS race_id, r.*, t.name AS track_name
                    FROM qp_entries e JOIN qp_races r ON r.id = e.race_id JOIN qp_tracks t ON t.id = r.track_id
@@ -119,7 +124,7 @@ try {
                 $calls[$c['entry_id']][$c['call_point']] = $c;
             }
             $fractions = $db->all('SELECT * FROM qp_race_fractions WHERE race_id = ? ORDER BY at_f', [$race['id']]);
-            $entriesSvc = new Entries($db, $settings);
+            $entriesSvc = new Entries($db, $gameSettings);
             $candidates = $stable && $race['status'] === 'open' ? $entriesSvc->candidates($member->id, $race) : [];
             $fee = $stable ? $entriesSvc->fee($race, $stable) : (int) $race['entry_fee'];
             $myClaims = $stable ? array_column($db->all(
@@ -148,13 +153,13 @@ try {
 
             if ($page === 'train' && $isPost) {
                 $horseId = (int) ($_POST['horse_id'] ?? 0);
-                View::flash((new Training($db, $settings))->train($member->id, $horseId, date('Y-m-d')));
+                View::flash((new Training($db, $gameSettings))->train($member->id, $horseId, date('Y-m-d')));
                 View::redirect(($_POST['back'] ?? '') === 'stable' ? '?p=' . max(1, (int) ($_POST['p'] ?? 1)) : '?page=horse&id=' . $horseId);
             }
 
             if ($page === 'horse-action' && $isPost) {
                 $horseId = (int) ($_POST['horse_id'] ?? 0);
-                $actions = new HorseActions($db, $settings);
+                $actions = new HorseActions($db, $gameSettings);
                 View::flash(match ($_POST['action'] ?? '') {
                     'retire'  => $actions->retire($member->id, $horseId),
                     'test'    => $actions->geneticTest($member->id, $horseId),
@@ -169,7 +174,7 @@ try {
             }
 
             if (in_array($page, ['race-enter', 'race-scratch', 'race-claim'], true) && $isPost) {
-                $entriesSvc = new Entries($db, $settings);
+                $entriesSvc = new Entries($db, $gameSettings);
                 $raceId = (int) ($_POST['race_id'] ?? 0);
                 View::flash(match ($page) {
                     'race-enter'   => $entriesSvc->enter($member->id, $raceId, (int) $_POST['horse_id'], date('Y-m-d')),
@@ -186,11 +191,11 @@ try {
                     break;
                 }
                 if ($isPost) {
-                    $changed = $settings->save((array) ($_POST['s'] ?? []));
+                    $changed = $gameSettings->save((array) ($_POST['s'] ?? []));
                     View::flash($changed ? 'Saved: ' . implode(', ', $changed) . '.' : 'Nothing changed.');
                     View::redirect('?page=admin-settings');
                 }
-                View::render('admin_settings', $shared + ['groups' => $settings->grouped()]);
+                View::render('admin_settings', $shared + ['groups' => $gameSettings->grouped()]);
                 break;
             }
 
@@ -230,6 +235,22 @@ try {
                 break;
             }
 
+            if ($page === 'admin-jockeys') {
+                if (!$member->isAdmin) {
+                    http_response_code(403);
+                    View::render('not_found', $shared);
+                    break;
+                }
+                $jockeysSvc = new Jockeys($db);
+                if ($isPost) {
+                    $n = $jockeysSvc->save((array) ($_POST['name'] ?? []), (array) ($_POST['active'] ?? []), (array) ($_POST['add'] ?? []));
+                    View::flash($n ? "Saved $n change" . ($n === 1 ? '' : 's') . '.' : 'Nothing changed.');
+                    View::redirect('?page=admin-jockeys');
+                }
+                View::render('admin_jockeys', $shared + ['jockeys' => $jockeysSvc->all(), 'maxField' => $gameSettings->int('max_field_size')]);
+                break;
+            }
+
             if ($page === 'admin-reports') {
                 if (!$member->isAdmin) {
                     http_response_code(403);
@@ -251,14 +272,14 @@ try {
 
             if ($page === 'studs') {
                 $surface = in_array($_GET['surface'] ?? '', ['dirt', 'turf', 'steeplechase'], true) ? $_GET['surface'] : null;
-                $studs = (new Breeding($db, $settings, $clock))->studs($surface);
-                $bookCaps = ['game' => $settings->int('book_cap_game'), 'player' => $settings->int('book_cap_player')];
+                $studs = (new Breeding($db, $gameSettings, $clock))->studs($surface);
+                $bookCaps = ['game' => $gameSettings->int('book_cap_game'), 'player' => $gameSettings->int('book_cap_player')];
                 View::render('studs', $shared + compact('studs', 'surface', 'bookCaps'));
                 break;
             }
 
             if ($page === 'breed') {
-                $breeding = new Breeding($db, $settings, $clock);
+                $breeding = new Breeding($db, $gameSettings, $clock);
                 if ($isPost) {
                     $result = $breeding->breed($member->id, (int) $_POST['sire_id'], (int) $_POST['dam_id'], (int) $_POST['foal_year'], (string) $_POST['foal_name']);
                     if ($result['born_dead']) {
@@ -287,7 +308,7 @@ try {
 
             if ($page === 'create-horse') {
                 if ($isPost) {
-                    $id = (new HorseFactory($db, $settings, $clock))->createFoundation($member->id, [
+                    $id = (new HorseFactory($db, $gameSettings, $clock))->createFoundation($member->id, [
                         'name'    => (string) $_POST['name'],
                         'sex'     => (string) $_POST['sex'],
                         'surface' => (string) $_POST['surface'],
