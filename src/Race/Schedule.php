@@ -168,10 +168,10 @@ final class Schedule
             $surface = 'dirt';
         }
 
-        // Age groups: 2-year-olds, 3-year-olds, or 3 and up (steeplechase is 3 and up or 4 and up).
+        // Age groups: 2-year-olds, 3-year-olds, or 3 and up. Steeplechase is always 4 and up.
         $roll = mt_rand(1, 100);
         if ($surface === 'steeplechase') {
-            [$min, $max] = in_array($level, ['g1', 'g2', 'g3'], true) || $roll > 50 ? [4, null] : [3, null];
+            [$min, $max] = [4, null];
         } elseif ($roll <= ($level === 'maiden' ? 35 : 20) && $gameMonth >= 5) {
             // Two-year-olds race from late spring, as in real racing.
             [$min, $max] = [2, 2];

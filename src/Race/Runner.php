@@ -199,7 +199,7 @@ final class Runner
             $ids[] = $this->makeGhost($race);
         }
         foreach ($ids as $id) {
-            $jockey = (int) $this->db->value('SELECT id FROM qp_jockeys ORDER BY RAND() LIMIT 1');
+            $jockey = Jockeys::pick($this->db, (int) $race['id']);
             $this->db->run('INSERT INTO qp_entries (race_id, horse_id, owner_id, jockey_id) VALUES (?, ?, NULL, ?)', [$race['id'], $id, $jockey]);
         }
     }
