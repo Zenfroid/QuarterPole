@@ -34,9 +34,9 @@
     </div>
     <?php if ($list['pages'] > 1): ?>
       <nav class="pager">
-        <?php if ($p > 1): ?><a href="?p=<?= $p - 1 ?>">&larr; Previous</a><?php endif ?>
+        <?php if ($p > 1): ?><a href="?page=dashboard&amp;p=<?= $p - 1 ?>">&larr; Previous</a><?php endif ?>
         <span>Page <?= $p ?> of <?= $list['pages'] ?></span>
-        <?php if ($p < $list['pages']): ?><a href="?p=<?= $p + 1 ?>">Next &rarr;</a><?php endif ?>
+        <?php if ($p < $list['pages']): ?><a href="?page=dashboard&amp;p=<?= $p + 1 ?>">Next &rarr;</a><?php endif ?>
       </nav>
     <?php endif ?>
   <?php endif ?>

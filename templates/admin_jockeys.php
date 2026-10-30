@@ -2,7 +2,7 @@
 $riding = count(array_filter($jockeys, fn ($j) => $j['active']));
 ?>
 <section>
-  <p class="muted"><a href="?page=admin-settings">Game settings</a> · <a href="?page=admin-reports">Trainer's report wording</a> · <a href="?page=admin-stakes">Stakes calendar</a> · Jockeys</p>
+  <p class="muted"><a href="?page=admin">Admin panel</a> › Jockeys</p>
   <h1>Jockeys</h1>
   <p class="muted">Each horse in a race gets a different jockey, picked at random from those riding. All jockeys ride equally well for now. Untick Riding to retire a jockey: they get no new rides, and old race charts keep their name.</p>
   <?php if ($riding < $maxField): ?>

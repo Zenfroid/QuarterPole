@@ -389,3 +389,11 @@ CREATE TABLE qp_bids (
   CONSTRAINT fk_bid_auction FOREIGN KEY (auction_id) REFERENCES qp_auctions(id),
   CONSTRAINT fk_bid_bidder  FOREIGN KEY (bidder_id)  REFERENCES qp_stables(member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Text pages (welcome, rules, guide), edited on the admin panel.
+CREATE TABLE qp_pages (
+  slug        VARCHAR(20)  NOT NULL PRIMARY KEY,
+  title       VARCHAR(100) NOT NULL,
+  body        TEXT         NOT NULL,
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

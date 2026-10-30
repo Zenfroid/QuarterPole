@@ -1,6 +1,6 @@
 <?php use QuarterPole\Csrf; ?>
 <section>
-  <p class="muted">Game settings · <a href="?page=admin-reports">Trainer's report wording</a> · <a href="?page=admin-stakes">Stakes calendar</a> · <a href="?page=admin-jockeys">Jockeys</a></p>
+  <p class="muted"><a href="?page=admin">Admin panel</a> › Game settings</p>
   <h1>Game settings</h1>
   <p class="muted">Every tunable number in the game. Changes take effect on the next page load or cron run.</p>
   <form method="post" action="?page=admin-settings">

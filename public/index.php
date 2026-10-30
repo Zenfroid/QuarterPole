@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 // Front controller: every page is index.php?page=...
 
+use QuarterPole\AdminHorses;
 use QuarterPole\Auth\DevAuth;
 use QuarterPole\Breeding;
 use QuarterPole\Csrf;
 use QuarterPole\Horse;
 use QuarterPole\HorseActions;
 use QuarterPole\HorseFactory;
+use QuarterPole\Pages;
 use QuarterPole\Pedigree;
 use QuarterPole\Race\Entries;
 use QuarterPole\Race\Jockeys;
@@ -44,7 +46,7 @@ try {
             }
             if ($isPost) {
                 $auth->login(max(1, (int) $_POST['id']), trim($_POST['name']) ?: 'Tester', !empty($_POST['admin']));
-                View::redirect('?');
+                View::redirect('?page=dashboard');
             }
             View::render('dev_login', $shared);
             break;
@@ -54,6 +56,14 @@ try {
                 $auth->logout();
             }
             View::redirect('?');
+
+        case 'home':
+        case 'rules':
+        case 'guide':
+            // Public text pages, edited on the admin panel.
+            $doc = Pages::find($db, $page === 'home' ? 'welcome' : $page);
+            View::render('page', $shared + ['doc' => $doc, 'isHome' => $page === 'home']);
+            break;
 
         case 'horse':
             $horse = Horse::find($db, (int) ($_GET['id'] ?? 0));
@@ -138,14 +148,13 @@ try {
         default:
             // Everything below needs a logged-in member with a stable.
             if (!$member) {
-                View::render('welcome', $shared);
-                break;
+                View::redirect('?');
             }
             if (!$stable) {
                 if ($isPost && $page === 'create-stable') {
                     $stables->create($member->id, (string) $_POST['stable_name']);
                     View::flash('Welcome to Quarter Pole! Your stable is open.');
-                    View::redirect('?');
+                    View::redirect('?page=dashboard');
                 }
                 View::render('stable_setup', $shared);
                 break;
@@ -154,7 +163,7 @@ try {
             if ($page === 'train' && $isPost) {
                 $horseId = (int) ($_POST['horse_id'] ?? 0);
                 View::flash((new Training($db, $gameSettings))->train($member->id, $horseId, date('Y-m-d')));
-                View::redirect(($_POST['back'] ?? '') === 'stable' ? '?p=' . max(1, (int) ($_POST['p'] ?? 1)) : '?page=horse&id=' . $horseId);
+                View::redirect(($_POST['back'] ?? '') === 'stable' ? '?page=dashboard&p=' . max(1, (int) ($_POST['p'] ?? 1)) : '?page=horse&id=' . $horseId);
             }
 
             if ($page === 'horse-action' && $isPost) {
@@ -182,6 +191,59 @@ try {
                     'race-claim'   => $entriesSvc->claim($member->id, (int) $_POST['entry_id'], date('Y-m-d')),
                 });
                 View::redirect('?page=race&id=' . $raceId);
+            }
+
+            if (str_starts_with($page, 'admin') && !$member->isAdmin) {
+                http_response_code(403);
+                View::render('not_found', $shared);
+                break;
+            }
+
+            if ($page === 'admin') {
+                $counts = [
+                    'horses'  => (int) $db->value("SELECT COUNT(*) FROM qp_horses WHERE origin <> 'ghost' AND status IN ('active','retired')"),
+                    'stables' => (int) $db->value('SELECT COUNT(*) FROM qp_stables'),
+                    'stakes'  => (int) $db->value('SELECT COUNT(*) FROM qp_stakes WHERE active = 1'),
+                    'jockeys' => (int) $db->value('SELECT COUNT(*) FROM qp_jockeys WHERE active = 1'),
+                ];
+                View::render('admin', $shared + compact('counts'));
+                break;
+            }
+
+            if ($page === 'admin-pages') {
+                $slug = isset(Pages::SLUGS[$_POST['slug'] ?? $_GET['slug'] ?? '']) ? ($_POST['slug'] ?? $_GET['slug']) : 'welcome';
+                if ($isPost) {
+                    Pages::save($db, $slug, (string) ($_POST['title'] ?? ''), (string) ($_POST['body'] ?? ''));
+                    View::flash('Saved the ' . Pages::SLUGS[$slug] . ' page.');
+                    View::redirect('?page=admin-pages&slug=' . $slug);
+                }
+                $doc = Pages::find($db, $slug) ?? ['title' => '', 'body' => ''];
+                View::render('admin_pages', $shared + compact('slug', 'doc'));
+                break;
+            }
+
+            if ($page === 'admin-horses') {
+                $q = (string) ($_GET['q'] ?? '');
+                $found = (new AdminHorses($db))->search($q);
+                View::render('admin_horses', $shared + compact('q', 'found'));
+                break;
+            }
+
+            if ($page === 'admin-horse') {
+                $hid = (int) ($_POST['id'] ?? $_GET['id'] ?? 0);
+                if ($isPost) {
+                    $changed = (new AdminHorses($db))->save($hid, $_POST);
+                    View::flash($changed ? 'Saved: ' . implode(', ', $changed) . '.' : 'Nothing changed.');
+                    View::redirect('?page=admin-horse&id=' . $hid);
+                }
+                $horse = Horse::find($db, $hid);
+                if (!$horse) {
+                    http_response_code(404);
+                    View::render('not_found', $shared);
+                    break;
+                }
+                View::render('admin_horse', $shared + compact('horse'));
+                break;
             }
 
             if ($page === 'admin-settings') {
@@ -330,7 +392,9 @@ try {
     // Show the problem and return the player to the form they came from.
     View::flash($err->getMessage(), 'error');
     View::redirect(match ($page) {
-        'create-stable', 'train' => '?',
+        'create-stable', 'train' => '?page=dashboard',
+        'admin-horse' => '?page=admin-horse&id=' . (int) ($_POST['id'] ?? 0),
+        'admin-pages' => '?page=admin-pages&slug=' . rawurlencode((string) ($_POST['slug'] ?? '')),
         'admin-stakes' => '?page=admin-stakes' . (($_POST['id'] ?? '') === '' ? '&add=1' : '&edit=' . (int) $_POST['id']),
         'race-enter', 'race-scratch', 'race-claim' => '?page=race&id=' . (int) ($_POST['race_id'] ?? 0),
         'horse-action' => '?page=horse&id=' . (int) ($_POST['horse_id'] ?? 0),
