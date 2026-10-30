@@ -29,7 +29,10 @@ form input[type=text], form input[type=number], form select { display: block; wi
 form label.check { display: flex; gap: 8px; align-items: center; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
 .card { display: flex; flex-direction: column; gap: 2px; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; color: var(--text); }
-.card:hover { border-color: var(--accent); }
+.card a { color: var(--text); text-decoration: none; }
+.card a:hover { color: var(--accent); }
+.card-action { margin-top: 8px; }
+button.small { padding: 5px 12px; font-size: .9rem; }
 .muted, .note { color: var(--muted); }
 .note { font-size: .92rem; }
 .lede { font-size: 1.1rem; margin: 0 0 4px; }

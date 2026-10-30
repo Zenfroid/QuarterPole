@@ -24,6 +24,7 @@ if (!is_file($configFile)) {
     exit('Missing config.local.php. Copy config.example.php to config.local.php and fill it in.');
 }
 $config = require $configFile;
+date_default_timezone_set($config['timezone'] ?? 'America/New_York');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

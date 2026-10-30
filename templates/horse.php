@@ -1,5 +1,6 @@
-<?php use QuarterPole\GameClock; use QuarterPole\Horse;
+<?php use QuarterPole\Csrf; use QuarterPole\GameClock; use QuarterPole\Horse; use QuarterPole\Maturity; use QuarterPole\Training;
 $age = GameClock::ageOn($horse['birth_game_date'], $today);
+$maturity = Maturity::factor($horse, $age, Maturity::yearFraction($today), $peakYears);
 $labels = ['basic' => 'Basic trainer', 'experienced' => 'Experienced trainer', 'expert' => 'Expert trainer'];
 ?>
 <section>
@@ -30,6 +31,20 @@ $labels = ['basic' => 'Basic trainer', 'experienced' => 'Experienced trainer', '
   </div>
 
   <?php if ($isOwner): ?>
+    <div class="panel">
+      <h2>Training</h2>
+      <p><?= e(Maturity::label($maturity, $age, (int) $horse['peak_age'])) ?></p>
+      <?php if (Training::canTrain($horse, date('Y-m-d'))): ?>
+        <form method="post" action="?page=train">
+          <?= Csrf::field() ?>
+          <input type="hidden" name="horse_id" value="<?= (int) $horse['id'] ?>">
+          <button type="submit">Train</button>
+        </form>
+      <?php elseif ($horse['status'] === 'active'): ?>
+        <p class="muted">Trained today. Come back tomorrow.</p>
+      <?php endif ?>
+    </div>
+
     <div class="panel">
       <h2>Trainer's notes</h2>
       <?php foreach ($reports as $r): ?>
