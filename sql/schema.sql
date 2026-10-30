@@ -129,7 +129,7 @@ CREATE TABLE qp_horses (
   stat_potency     TINYINT UNSIGNED NOT NULL,
   energy           TINYINT UNSIGNED NOT NULL DEFAULT 100,  -- current %, not a peak stat
   peak_age         TINYINT UNSIGNED NOT NULL,      -- 2 to 5, hidden, inherited
-  training_progress TINYINT UNSIGNED NOT NULL DEFAULT 0,   -- 0-100 boost toward peak before peak age
+  training_progress DECIMAL(5,2) NOT NULL DEFAULT 0,       -- 0-100 boost toward peak before peak age
   is_great         TINYINT(1)   NOT NULL DEFAULT 0,
   is_dud           TINYINT(1)   NOT NULL DEFAULT 0,
   coi              DECIMAL(6,4) NOT NULL DEFAULT 0, -- 5-generation coefficient of inbreeding
