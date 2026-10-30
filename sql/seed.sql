@@ -51,7 +51,7 @@ INSERT INTO qp_settings (setting_key, setting_value, description) VALUES
 ('book_cap_game',             '25',      'Max mares per game stallion per game year'),
 ('mare_breeding_age',         '4',       ''),
 ('stallion_breeding_age',     '3',       ''),
-('training_progress_per_session', '2', 'Points (of 100) of the gap to peak closed per Train'),
+('training_progress_per_session', '2', 'Training progress points per Train; 100 = full peak'),
 ('running_style_lean',        '10',      'Foundation stat lean by running style'),
 -- Aging
 ('peak_years',                '2',       'Game years a horse stays at peak'),
