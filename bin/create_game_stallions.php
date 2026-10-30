@@ -15,7 +15,7 @@ if (PHP_SAPI !== 'cli') {
 require dirname(__DIR__) . '/src/bootstrap.php';
 
 $perSurface = max(1, (int) ($argv[1] ?? 6));
-$factory = new HorseFactory($db, $settings, $clock);
+$factory = new HorseFactory($db, $gameSettings, $clock);
 $year = (int) $clock->today()->format('Y');
 
 $made = 0;
@@ -40,7 +40,7 @@ foreach (['dirt', 'turf', 'steeplechase'] as $surface) {
             'origin'          => 'game_stallion',
             'status'          => 'retired',
             'stud_fee'        => $fee,
-            'book_size'       => $settings->int('book_cap_game'),
+            'book_size'       => $gameSettings->int('book_cap_game'),
             'genetics_tested' => 1,
             'report_level'    => 'none',
         ];

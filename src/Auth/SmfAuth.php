@@ -10,16 +10,12 @@ final class SmfAuth implements Auth
     private ?Member $member = null;
     private bool $loaded = false;
 
-    public function __construct(private string $ssiPath) {}
 
     public function member(): ?Member
     {
         if (!$this->loaded) {
             $this->loaded = true;
-            if (!is_file($this->ssiPath)) {
-                throw new \RuntimeException('SMF SSI.php not found at ' . $this->ssiPath);
-            }
-            require_once $this->ssiPath;
+            // bootstrap.php has already loaded SSI.php, which fills $user_info.
             global $user_info;
             if (!empty($user_info) && empty($user_info['is_guest'])) {
                 $this->member = new Member(

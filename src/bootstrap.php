@@ -26,11 +26,22 @@ if (!is_file($configFile)) {
 $config = require $configFile;
 date_default_timezone_set($config['timezone'] ?? 'America/New_York');
 
+// With the forum login, SMF's SSI.php must load here: at global scope (it relies on globals)
+// and before any session starts, so the game shares SMF's session. Game globals avoid SMF's
+// names ($settings, $context, $user_info, $modSettings).
+if (($config['auth'] ?? 'dev') === 'smf' && PHP_SAPI !== 'cli') {
+    if (!is_file($config['smf_ssi_path'])) {
+        http_response_code(500);
+        exit('SMF SSI.php not found at the smf_ssi_path in config.local.php.');
+    }
+    require_once $config['smf_ssi_path'];
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 $db       = new QuarterPole\Db($config['db']);
-$settings = new QuarterPole\Settings($db);
+$gameSettings = new QuarterPole\Settings($db);
 $auth     = QuarterPole\Auth\AuthFactory::make($config);
 $clock    = new QuarterPole\GameClock($db);
