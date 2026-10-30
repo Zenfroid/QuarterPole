@@ -40,6 +40,7 @@ Run `php bin/daily.php` once a day in the evening (for example `0 21 * * *`). It
 - Trainer's reports: free basic notes at age 2 (the cron writes them when a foal turns 2), then Experienced (500) and Expert (1,000) trainers on the horse page. Each level is written once and never redone.
 - Leaving the stable: pension a horse to the retirement home, or send it to the TRP for a creation credit back once it has been offered (entered in a claiming race, or at auction once auctions exist). Both are permanent.
 - Admin settings page (`?page=admin-settings`, forum admins only; in test login tick "admin"): every number in `qp_settings`, grouped, with checks so numbers stay numbers.
+- Trainer's report wording (`?page=admin-reports`, admins): every line a trainer can write, by topic and band, stored in `qp_report_lines`. Add several lines to a slot for variety; `{name}` becomes the horse's name.
 
 ## How the tables fit together
 
@@ -53,6 +54,7 @@ Run `php bin/daily.php` once a day in the evening (for example `0 21 * * *`). It
 | `qp_subscriptions` | Premium payments (provider decided later). |
 | `qp_badges` | Badges each stable has earned, with tier. |
 | `qp_horses` | Every horse ever, including the dead, rehomed and ghosts, so pedigrees always work. Holds hidden peak stats, color genotype, status, stud settings and career totals. |
+| `qp_report_lines` | The wording trainers use, editable on the admin page. Several lines per topic and band are picked at random. |
 | `qp_trainer_reports` | Static trainer notes, one per level. An upgrade adds a level; nothing is redone. |
 | `qp_breedings` | Every breeding: sire, dam, fee paid, foal, and whether it was backdated or born dead. One foal per mare per game year is enforced here. |
 | `qp_tracks` | The 8 tracks with their personality (stretch, turns, jumps, rain, surface profile). |

@@ -48,7 +48,7 @@ $turning2 = $db->all(
 );
 foreach ($turning2 as $h) {
     $db->transaction(function (Db $db) use ($h) {
-        $db->run("INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, 'basic', ?)", [$h['id'], TrainerNotes::write($h, 'basic')]);
+        $db->run("INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, 'basic', ?)", [$h['id'], TrainerNotes::write($db, $h, 'basic')]);
         $db->run("UPDATE qp_horses SET report_level = 'basic' WHERE id = ?", [$h['id']]);
     });
 }

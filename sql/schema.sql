@@ -184,6 +184,16 @@ CREATE TABLE qp_trainer_reports (
   CONSTRAINT fk_report_horse FOREIGN KEY (horse_id) REFERENCES qp_horses(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Trainer's report wording, editable on the admin page. Several lines for the same
+-- topic and band are picked between at random. {name} is replaced with the horse's name.
+CREATE TABLE qp_report_lines (
+  id     INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  topic  VARCHAR(32)  NOT NULL,   -- style_front, surface_turf, distance_mile, stat_break ...
+  band   ENUM('exceptional','very_good','useful','ordinary','weak') NULL,  -- stats only
+  line   VARCHAR(255) NOT NULL,
+  KEY ix_report_topic (topic, band)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE qp_breedings (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   sire_id         INT UNSIGNED NOT NULL,

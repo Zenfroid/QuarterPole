@@ -83,7 +83,7 @@ final class HorseActions
             }
             (new Ledger($db))->move($memberId, -$this->settings->int("report_cost_$level"), 'trainer_report', 'qp_horses', $horseId,
                 ucfirst($level) . ' trainer: ' . $h['name']);
-            $db->run('INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, ?, ?)', [$horseId, $level, TrainerNotes::write($h, $level)]);
+            $db->run('INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, ?, ?)', [$horseId, $level, TrainerNotes::write($db, $h, $level)]);
             $db->run('UPDATE qp_horses SET report_level = ? WHERE id = ?', [$level, $horseId]);
             return 'The ' . ($level === 'expert' ? 'Expert' : 'Experienced') . ' trainer has written up ' . $h['name'] . '.';
         });

@@ -63,7 +63,7 @@ final class HorseFactory
             // Foundation horses are at least 2, so the free basic report is written now.
             $db->run(
                 "INSERT INTO qp_trainer_reports (horse_id, level, notes) VALUES (?, 'basic', ?)",
-                [$id, TrainerNotes::write($row, 'basic')]
+                [$id, TrainerNotes::write($db, $row, 'basic')]
             );
             return $id;
         });
