@@ -9,29 +9,29 @@ foreach ($lines as $l) {
 }
 ?>
 <section>
-  <p class="muted"><a href="admin.php">Admin panel</a> › Trainer's report wording</p>
+  <p class="text-body-secondary"><a href="admin.php">Admin panel</a> › Trainer's report wording</p>
   <h1>Trainer's report wording</h1>
-  <p class="muted">When a slot has several lines, the trainer picks one at random. Write <code>{name}</code> to use the horse's name. Clear a line to remove it. Reports already written keep their old wording.</p>
+  <p class="text-body-secondary">When a slot has several lines, the trainer picks one at random. Write <code>{name}</code> to use the horse's name. Clear a line to remove it. Reports already written keep their old wording.</p>
   <div class="report-admin">
     <nav class="topic-list">
       <?php foreach ($topics as $key => $label): ?>
-        <a href="admin_reports.php?topic=<?= e($key) ?>" class="<?= $key === $topic ? 'on' : '' ?>"><?= e($label) ?> <span class="muted"><?= (int) ($counts[$key] ?? 0) ?></span></a>
+        <a href="admin_reports.php?topic=<?= e($key) ?>" class="<?= $key === $topic ? 'on' : '' ?>"><?= e($label) ?> <span class="text-body-secondary"><?= (int) ($counts[$key] ?? 0) ?></span></a>
       <?php endforeach ?>
     </nav>
-    <form method="post" action="admin_reports.php" class="panel">
+    <form method="post" action="admin_reports.php" class="card card-body mb-3">
       <?= Csrf::field() ?>
       <input type="hidden" name="topic" value="<?= e($topic) ?>">
       <h2><?= e($topics[$topic]) ?></h2>
-      <?php if ($isStat): ?><p class="note">The trainer's judgement of the stat (with their usual error) decides the band.</p><?php endif ?>
+      <?php if ($isStat): ?><p class="small text-body-secondary">The trainer's judgement of the stat (with their usual error) decides the band.</p><?php endif ?>
       <?php foreach ($bands as $band): ?>
         <?php if ($isStat): ?><h3><?= e($bandLabel($band)) ?></h3><?php endif ?>
         <?php foreach ($byBand[$band] ?? [] as $l): ?>
-          <input class="line" type="text" name="line[<?= (int) $l['id'] ?>]" value="<?= e($l['line']) ?>" maxlength="255">
+          <input class="form-control line" type="text" name="line[<?= (int) $l['id'] ?>]" value="<?= e($l['line']) ?>" maxlength="255">
         <?php endforeach ?>
-        <?php if (empty($byBand[$band])): ?><p class="warn">No lines yet: reports will skip this.</p><?php endif ?>
-        <input class="line" type="text" name="add[<?= e($topic . '|' . $band) ?>]" placeholder="Add a line" maxlength="255">
+        <?php if (empty($byBand[$band])): ?><p class="text-danger">No lines yet: reports will skip this.</p><?php endif ?>
+        <input class="form-control line" type="text" name="add[<?= e($topic . '|' . $band) ?>]" placeholder="Add a line" maxlength="255">
       <?php endforeach ?>
-      <button type="submit">Save</button>
+      <button type="submit" class="btn btn-primary">Save</button>
     </form>
   </div>
 </section>

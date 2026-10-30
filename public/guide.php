@@ -3,7 +3,7 @@
 require __DIR__ . '/_boot.php';
 require QP_ROOT . '/templates/header.php';
 ?>
-<section class="panel page-text">
+<section class="card card-body mb-3 page-text">
   <h1>How to play</h1>
 
   <h2>1. Open your stable</h2>

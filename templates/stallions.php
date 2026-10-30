@@ -1,6 +1,6 @@
 <?php use QuarterPole\GameClock; ?>
 <section>
-  <div class="heading-row">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h1>Stallions at stud</h1>
     <nav class="filters">
       <a href="stallions.php" class="<?= $surface ? '' : 'on' ?>">All</a>
@@ -10,10 +10,10 @@
     </nav>
   </div>
   <?php if (!$studs): ?>
-    <p class="panel">No stallions are standing at stud yet.</p>
+    <p class="card card-body mb-3">No stallions are standing at stud yet.</p>
   <?php else: ?>
     <div class="table-wrap">
-      <table class="list">
+      <table class="table table-hover align-middle">
         <thead><tr><th>Stallion</th><th>Age</th><th>Color</th><th>Surface</th><th>Owner</th><th>Fee</th><th>Book</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($studs as $h):
@@ -27,12 +27,12 @@
             <td><?= e($h['owner_name'] ?? 'Quarter Pole Stud') ?></td>
             <td class="num"><?= e(money($h['stud_fee'])) ?></td>
             <td class="num"><?= $left ?> of <?= $cap ?> left</td>
-            <td><?php if ($left > 0): ?><a href="breed.php?sire=<?= (int) $h['id'] ?>">Book a mare</a><?php else: ?><span class="muted">Full</span><?php endif ?></td>
+            <td><?php if ($left > 0): ?><a href="breed.php?sire=<?= (int) $h['id'] ?>">Book a mare</a><?php else: ?><span class="text-body-secondary">Full</span><?php endif ?></td>
           </tr>
         <?php endforeach ?>
         </tbody>
       </table>
     </div>
   <?php endif ?>
-  <p class="note">Your own stallions breed your own mares for free; open his page and use Book a mare.</p>
+  <p class="small text-body-secondary">Your own stallions breed your own mares for free; open his page and use Book a mare.</p>
 </section>

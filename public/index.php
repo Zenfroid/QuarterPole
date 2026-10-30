@@ -3,7 +3,7 @@
 require __DIR__ . '/_boot.php';
 require QP_ROOT . '/templates/header.php';
 ?>
-<section class="panel page-text">
+<section class="card card-body mb-3 page-text">
   <h1>Welcome to Quarter Pole</h1>
 
   <p>Breed better racehorses from foundation stock, race them for Cash and glory, and build a stable people talk about.</p>
@@ -23,11 +23,11 @@ require QP_ROOT . '/templates/header.php';
 
   <p class="page-cta">
     <?php if (!$member): ?>
-      <a class="button" href="<?= e($auth->loginUrl()) ?>">Log in to play</a>
+      <a class="btn btn-primary" href="<?= e($auth->loginUrl()) ?>">Log in to play</a>
     <?php elseif (!$stable): ?>
-      <a class="button" href="dashboard.php">Open your stable</a>
+      <a class="btn btn-primary" href="dashboard.php">Open your stable</a>
     <?php else: ?>
-      <a class="button" href="dashboard.php">Go to your dashboard</a>
+      <a class="btn btn-primary" href="dashboard.php">Go to your dashboard</a>
     <?php endif ?>
   </p>
 </section>

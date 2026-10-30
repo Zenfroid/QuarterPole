@@ -24,13 +24,13 @@ $status = function (array $r) use ($realToday): string {
   </nav>
 
   <?php if (!$races): ?>
-    <p class="panel">No races on this day.</p>
+    <p class="card card-body mb-3">No races on this day.</p>
   <?php endif ?>
 
   <?php foreach ($byTrack as $track => $list): ?>
     <h2><?= e($track) ?></h2>
     <div class="table-wrap">
-      <table class="list">
+      <table class="table table-hover align-middle">
         <thead><tr><th>Race</th><th>Type</th><th>Conditions</th><th>Distance</th><th class="num">Purse</th><th class="num">Entry</th><th class="num">Field</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($list as $r): ?>
@@ -49,5 +49,5 @@ $status = function (array $r) use ($realToday): string {
       </table>
     </div>
   <?php endforeach ?>
-  <p class="note">Entries close when the evening's races run. Races with fewer than 5 horses are filled with ghost horses; races with no player horses are cancelled.</p>
+  <p class="small text-body-secondary">Entries close when the evening's races run. Races with fewer than 5 horses are filled with ghost horses; races with no player horses are cancelled.</p>
 </section>
