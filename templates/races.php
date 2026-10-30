@@ -16,7 +16,7 @@ $status = function (array $r) use ($realToday): string {
   <h1>Races</h1>
   <nav class="days">
     <?php foreach ($days as $d): $dt = new DateTimeImmutable($d['run_on']); ?>
-      <a href="?page=races&amp;day=<?= e($d['run_on']) ?>" class="<?= $d['run_on'] === $day ? 'on' : '' ?>">
+      <a href="races.php?day=<?= e($d['run_on']) ?>" class="<?= $d['run_on'] === $day ? 'on' : '' ?>">
         <strong><?= $d['run_on'] === $realToday ? 'Today' : e($dt->format('D j M')) ?></strong>
         <span><?= e(GameClock::label(new DateTimeImmutable($d['game_date']))) ?></span>
       </a>
@@ -35,14 +35,14 @@ $status = function (array $r) use ($realToday): string {
         <tbody>
         <?php foreach ($list as $r): ?>
           <tr>
-            <td><a href="?page=race&amp;id=<?= (int) $r['id'] ?>"><?= e($r['name']) ?></a></td>
+            <td><a href="race.php?id=<?= (int) $r['id'] ?>"><?= e($r['name']) ?></a></td>
             <td><?= e(Entries::raceLabel($r)) ?></td>
             <td><?= e(Entries::conditions($r)) ?></td>
             <td><?= e(Calls::distanceLabel((float) $r['distance_f'])) ?> <?= e($r['surface']) ?></td>
             <td class="num"><?= e(number_format((int) $r['purse'])) ?></td>
             <td class="num"><?= e(number_format((int) $r['entry_fee'])) ?></td>
             <td class="num"><?= (int) $r['field'] ?></td>
-            <td><a href="?page=race&amp;id=<?= (int) $r['id'] ?>"><?= e($status($r)) ?></a></td>
+            <td><a href="race.php?id=<?= (int) $r['id'] ?>"><?= e($status($r)) ?></a></td>
           </tr>
         <?php endforeach ?>
         </tbody>

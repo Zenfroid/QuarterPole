@@ -9,16 +9,16 @@ foreach ($lines as $l) {
 }
 ?>
 <section>
-  <p class="muted"><a href="?page=admin">Admin panel</a> › Trainer's report wording</p>
+  <p class="muted"><a href="admin.php">Admin panel</a> › Trainer's report wording</p>
   <h1>Trainer's report wording</h1>
   <p class="muted">When a slot has several lines, the trainer picks one at random. Write <code>{name}</code> to use the horse's name. Clear a line to remove it. Reports already written keep their old wording.</p>
   <div class="report-admin">
     <nav class="topic-list">
       <?php foreach ($topics as $key => $label): ?>
-        <a href="?page=admin-reports&amp;topic=<?= e($key) ?>" class="<?= $key === $topic ? 'on' : '' ?>"><?= e($label) ?> <span class="muted"><?= (int) ($counts[$key] ?? 0) ?></span></a>
+        <a href="admin_reports.php?topic=<?= e($key) ?>" class="<?= $key === $topic ? 'on' : '' ?>"><?= e($label) ?> <span class="muted"><?= (int) ($counts[$key] ?? 0) ?></span></a>
       <?php endforeach ?>
     </nav>
-    <form method="post" action="?page=admin-reports" class="panel">
+    <form method="post" action="admin_reports.php" class="panel">
       <?= Csrf::field() ?>
       <input type="hidden" name="topic" value="<?= e($topic) ?>">
       <h2><?= e($topics[$topic]) ?></h2>

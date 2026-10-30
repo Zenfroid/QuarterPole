@@ -12,9 +12,9 @@ $cell = function (?array $c) {
     return (int) $c['position'] . ($c['position'] > 1 ? ' <span class="muted">(' . e(Calls::margin($lengths)) . ')</span>' : '');
 };
 $horseLink = fn (array $e) => $e['origin'] === 'ghost' ? e($e['name']) . ' <span class="muted">(ghost)</span>'
-    : '<a href="?page=horse&amp;id=' . (int) $e['horse_id'] . '">' . e($e['name']) . '</a>';
+    : '<a href="horse.php?id=' . (int) $e['horse_id'] . '">' . e($e['name']) . '</a>';
 $post = function (string $action, array $fields, string $label) use ($race): string {
-    $html = '<form method="post" action="?page=' . $action . '" class="inline">' . Csrf::field()
+    $html = '<form method="post" action="race_action.php?do=' . $action . '" class="inline">' . Csrf::field()
         . '<input type="hidden" name="race_id" value="' . (int) $race['id'] . '">';
     foreach ($fields as $k => $v) {
         $html .= '<input type="hidden" name="' . e($k) . '" value="' . e($v) . '">';
@@ -23,7 +23,7 @@ $post = function (string $action, array $fields, string $label) use ($race): str
 };
 ?>
 <section>
-  <p class="muted"><a href="?page=races&amp;day=<?= e($race['run_on']) ?>">All races that day</a></p>
+  <p class="muted"><a href="races.php?day=<?= e($race['run_on']) ?>">All races that day</a></p>
   <h1><?= e($race['track_name']) ?>, <?= e($race['name']) ?></h1>
   <p class="lede">
     <?= e(Entries::raceLabel($race)) ?> · <?= e(Calls::distanceLabel((float) $race['distance_f'])) ?> on the <?= e($race['surface']) ?> ·
@@ -83,12 +83,12 @@ $post = function (string $action, array $fields, string $label) use ($race): str
                 <td><?= e($e['jockey_name']) ?></td>
                 <td>
                   <?php if ($isOpen && $member && (int) $e['owner_id'] === $member->id): ?>
-                    <?= $post('race-scratch', ['entry_id' => $e['id']], 'Scratch') ?>
+                    <?= $post('scratch', ['entry_id' => $e['id']], 'Scratch') ?>
                   <?php elseif ($isOpen && $stable && $race['race_level'] === 'claiming' && $e['owner_id'] !== null): ?>
                     <?php if (in_array($e['id'], $myClaims)): ?>
                       <span class="muted">Your claim is in</span>
                     <?php else: ?>
-                      <?= $post('race-claim', ['entry_id' => $e['id']], 'Claim for ' . number_format((int) $race['claiming_price'])) ?>
+                      <?= $post('claim', ['entry_id' => $e['id']], 'Claim for ' . number_format((int) $race['claiming_price'])) ?>
                     <?php endif ?>
                   <?php endif ?>
                 </td>
@@ -107,7 +107,7 @@ $post = function (string $action, array $fields, string $label) use ($race): str
         <?php if (!$ok): ?>
           <p class="muted">None of your active <?= e($race['surface']) ?> horses fit this race.</p>
         <?php else: ?>
-          <form method="post" action="?page=race-enter">
+          <form method="post" action="race_action.php?do=enter">
             <?= Csrf::field() ?>
             <input type="hidden" name="race_id" value="<?= (int) $race['id'] ?>">
             <label>Horse

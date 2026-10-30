@@ -35,11 +35,11 @@ final class DevAuth implements Auth
 
     public function loginUrl(): string
     {
-        return '?page=dev-login';
+        return 'dev_login.php';
     }
 
     public function logoutUrl(): string
     {
-        return '?page=dev-logout';
+        return 'dev_login.php?do=logout';
     }
 }

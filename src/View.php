@@ -5,14 +5,16 @@ namespace QuarterPole;
 
 final class View
 {
-    /** Renders templates/$name.php inside the layout. */
+    /** Renders templates/$name.php between the site header and footer. */
     public static function render(string $name, array $vars = []): void
     {
         extract($vars, EXTR_SKIP);
         ob_start();
         require QP_ROOT . "/templates/$name.php";
         $content = ob_get_clean();
-        require QP_ROOT . '/templates/layout.php';
+        require QP_ROOT . '/templates/header.php';
+        echo $content;
+        require QP_ROOT . '/templates/footer.php';
     }
 
     public static function redirect(string $to): never

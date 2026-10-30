@@ -11,13 +11,13 @@ $stats = array_filter(AdminHorses::NUMBERS, fn ($k) => str_starts_with($k, 'stat
 $other = array_diff_key(AdminHorses::NUMBERS, $stats);
 ?>
 <section>
-  <p class="muted"><a href="?page=admin">Admin panel</a> › <a href="?page=admin-horses">Horses</a> › <?= e($horse['name']) ?></p>
+  <p class="muted"><a href="admin.php">Admin panel</a> › <a href="admin_horses.php">Horses</a> › <?= e($horse['name']) ?></p>
   <div class="heading-row">
     <h1>Edit <?= e($horse['name']) ?> <span class="muted">#<?= (int) $horse['id'] ?></span></h1>
-    <a class="button" href="?page=horse&amp;id=<?= (int) $horse['id'] ?>">View the horse's page</a>
+    <a class="button" href="horse.php?id=<?= (int) $horse['id'] ?>">View the horse's page</a>
   </div>
   <p class="note">Changes save straight to the horse. Trainer's reports already written keep their wording; stats are on the 25 to 100 scale players never see.</p>
-  <form method="post" action="?page=admin-horse">
+  <form method="post" action="admin_horse.php">
     <?= Csrf::field() ?>
     <input type="hidden" name="id" value="<?= (int) $horse['id'] ?>">
     <div class="panel">

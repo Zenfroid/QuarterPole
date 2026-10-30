@@ -3,7 +3,7 @@
   <h1>Create a foundation horse</h1>
   <p>This uses 1 creation credit. You have <?= (int) $stable['creation_credits'] ?>.
      Stats, running style, peak age and color are rolled at random; a trainer's report comes with the horse.</p>
-  <form method="post" action="?page=create-horse">
+  <form method="post" action="create_horse.php">
     <?= Csrf::field() ?>
     <label>Name <input type="text" name="name" maxlength="18" required></label>
     <label>Sex

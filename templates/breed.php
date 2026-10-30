@@ -2,16 +2,15 @@
 <section>
   <h1>Proposed breeding</h1>
   <?php if (!$sire): ?>
-    <p class="panel">Pick a stallion from the <a href="?page=studs">stallions at stud</a> first.</p>
+    <p class="panel">Pick a stallion from the <a href="stallions.php">stallions at stud</a> first.</p>
   <?php else: ?>
-    <p class="lede">Stallion: <a href="?page=horse&amp;id=<?= (int) $sire['id'] ?>"><?= e($sire['name']) ?></a>
+    <p class="lede">Stallion: <a href="horse.php?id=<?= (int) $sire['id'] ?>"><?= e($sire['name']) ?></a>
       · <?= GameClock::ageOn($sire['birth_game_date'], $today) ?>-year-old · <?= e($sire['color_name']) ?> · prefers <?= e($sire['surface_pref']) ?></p>
 
     <?php if (!$mares): ?>
       <p class="panel">You have no mares ready to breed. A mare must be at least 4 and retired to breeding (open her page and choose Retire to breeding).</p>
     <?php else: ?>
-      <form method="get" class="panel">
-        <input type="hidden" name="page" value="breed">
+      <form method="get" action="breed.php" class="panel">
         <input type="hidden" name="sire" value="<?= (int) $sire['id'] ?>">
         <label>Your mare
           <select name="dam" onchange="this.form.submit()">
@@ -50,7 +49,7 @@
         <?php elseif (!$proposal['years']): ?>
           <p class="warn"><?= e($dam['name']) ?> has no open years for a foal with this stallion.</p>
         <?php else: ?>
-          <form method="post" action="?page=breed">
+          <form method="post" action="breed.php">
             <?= Csrf::field() ?>
             <input type="hidden" name="sire_id" value="<?= (int) $sire['id'] ?>">
             <input type="hidden" name="dam_id" value="<?= (int) $dam['id'] ?>">

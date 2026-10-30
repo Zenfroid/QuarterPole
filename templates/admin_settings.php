@@ -1,9 +1,9 @@
 <?php use QuarterPole\Csrf; ?>
 <section>
-  <p class="muted"><a href="?page=admin">Admin panel</a> › Game settings</p>
+  <p class="muted"><a href="admin.php">Admin panel</a> › Game settings</p>
   <h1>Game settings</h1>
   <p class="muted">Every tunable number in the game. Changes take effect on the next page load or cron run.</p>
-  <form method="post" action="?page=admin-settings">
+  <form method="post" action="admin_settings.php">
     <?= Csrf::field() ?>
     <?php foreach ($groups as $group => $rows): ?>
       <div class="panel">
