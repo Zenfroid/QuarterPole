@@ -5,10 +5,25 @@ The design decisions live in the design doc: https://claude.ai/artifact/1UuQMPLW
 
 ## Files
 
-- `sql/schema.sql`: every database table (draft v0.1).
-- `sql/seed.sql`: starting data, including all tunable settings, the 8 tracks (4 active at launch), the 6 series and a jockey pool.
+- `public/`: the web root (point the domain here). `index.php` handles every page; `style.css` is the look.
+- `src/`: game code (database, settings, login, stables, horse creation, color genetics, trainer notes).
+- `templates/`: the HTML for each page.
+- `sql/schema.sql`: every database table. `sql/seed.sql`: starting data, including all tunable settings, the 8 tracks (4 active at launch), the 6 series and a jockey pool.
+- `config.example.php`: copy to `config.local.php` (never committed) and fill in the database login.
 
-Both files load cleanly into MariaDB (tested 2026-10-29). Run `schema.sql` first, then `seed.sql`.
+## Running it locally
+
+1. Create a MySQL or MariaDB database, then load `sql/schema.sql` followed by `sql/seed.sql`.
+2. Copy `config.example.php` to `config.local.php` and fill in the database details. Leave `auth` as `'dev'`.
+3. From this folder, run `php -S 127.0.0.1:8080 -t public` and open http://127.0.0.1:8080.
+4. Log in with any member number (test mode), name your stable, and create foundation horses.
+
+## What works so far
+
+- Test login (no forum needed) and the SMF login adapter for later.
+- Naming a stable, which grants starting Cash and creation credits (logged in the Cash ledger).
+- Creating foundation horses with a credit: random stats, running style, peak age, Endurance by surface and color genetics, plus a basic trainer's report.
+- The stable page (cards, 12 per page) and the horse page (record, parents, COI, trainer's notes for the owner).
 
 ## How the tables fit together
 
