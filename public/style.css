@@ -80,3 +80,24 @@ form input.line { display: block; width: 100%; max-width: none; margin: 0 0 6px;
 .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 16px; }
 tr.muted td { color: var(--muted); }
 table.list.wrap td { white-space: normal; }
+
+/* Name menu in the header */
+.menu { position: relative; }
+.menu summary { cursor: pointer; list-style: none; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu summary::after { content: " \25BE"; color: var(--muted); }
+.menu-list { position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 180px; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.12); padding: 6px 0; }
+.menu-list a { padding: 8px 14px; text-decoration: none; color: var(--text); }
+.menu-list a:hover { background: var(--bg); color: var(--accent); }
+
+/* Text pages and admin */
+.page-text { max-width: 760px; }
+.page-text h2 { margin-top: 1.4em; }
+.page-text ul { padding-left: 22px; }
+.page-cta { margin-top: 20px; }
+.admin-cards .card { gap: 6px; }
+.admin-cards .card:hover { border-color: var(--accent); }
+.search { display: flex; gap: 8px; margin-bottom: 8px; max-width: 560px; }
+.search input { flex: 1; padding: 8px; font: inherit; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+textarea { display: block; width: 100%; padding: 8px; font: inherit; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); margin-bottom: 8px; }
+label.check { display: inline-flex; gap: 6px; align-items: center; }

@@ -13,15 +13,23 @@
   <span class="date"><?= e(GameClock::label($today)) ?></span>
   <nav>
     <a href="?page=races">Races</a>
+    <a href="?page=studs">Stallions</a>
+    <a href="?page=rules">Rules</a>
+    <a href="?page=guide">Guide</a>
     <?php if ($member): ?>
       <?php if ($stable): ?>
-        <a href="?page=studs">Stallions</a>
-        <?php if ($member->isAdmin): ?><a href="?page=admin-settings">Settings</a><?php endif ?>
         <span class="stat"><?= e(money($stable['cash'])) ?></span>
         <span class="stat"><?= (int) $stable['creation_credits'] ?> credits</span>
       <?php endif ?>
-      <span><?= e($member->name) ?></span>
-      <a href="<?= e($auth->logoutUrl()) ?>">Log out</a>
+      <details class="menu">
+        <summary><?= e($member->name) ?></summary>
+        <div class="menu-list">
+          <a href="?page=dashboard">Dashboard</a>
+          <?php if ($stable): ?><a href="?page=create-horse">Create a horse</a><?php endif ?>
+          <?php if ($member->isAdmin): ?><a href="?page=admin">Admin panel</a><?php endif ?>
+          <a href="<?= e($auth->logoutUrl()) ?>">Log out</a>
+        </div>
+      </details>
     <?php else: ?>
       <a href="<?= e($auth->loginUrl()) ?>">Log in</a>
     <?php endif ?>
@@ -31,5 +39,9 @@
   <?php if ($flash): ?><p class="flash <?= e($flash['kind']) ?>"><?= e($flash['text']) ?></p><?php endif ?>
   <?= $content ?>
 </main>
+<script>
+  // Close the name menu when clicking anywhere else.
+  document.addEventListener('click', e => document.querySelectorAll('details.menu[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
+</script>
 </body>
 </html>
