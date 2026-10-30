@@ -4,6 +4,9 @@
     <h1><?= e($stable['stable_name']) ?></h1>
     <a class="button" href="?page=create-horse">Create a foundation horse</a>
   </div>
+  <?php if ($badges): ?>
+    <p class="badges"><?php foreach ($badges as $b): ?><span class="badge"><?= e($b['name'] ?? ucwords(str_replace('_', ' ', $b['badge_code']))) ?></span><?php endforeach ?></p>
+  <?php endif ?>
 
   <?php if (!$list['rows']): ?>
     <p class="panel">Your stable is empty. Use a creation credit to bring in your first foundation horse.</p>

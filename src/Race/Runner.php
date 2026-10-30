@@ -76,6 +76,9 @@ final class Runner
             $this->record($race, $runners, $result);
             $this->settleClaims($race);
             $db->run("UPDATE qp_races SET status = 'run', track_condition = ? WHERE id = ?", [$race['track_condition'], $raceId]);
+            if ($race['series_id'] !== null) {
+                $this->checkSeries($race, $runners[$result['order'][0]]);
+            }
             return true;
         });
     }
@@ -123,6 +126,24 @@ final class Runner
         }
         foreach ($result['fractions'] as $at => $time) {
             $this->db->run('INSERT INTO qp_race_fractions (race_id, at_f, time_s) VALUES (?, ?, ?)', [$race['id'], $at, round($time, 2)]);
+        }
+    }
+
+    /** A horse that has now won every leg of a triple this game year earns its owner the badge. */
+    private function checkSeries(array $race, array $winner): void
+    {
+        if ($winner['owner_id'] === null) {
+            return;
+        }
+        $series = $this->db->one('SELECT * FROM qp_series WHERE id = ?', [$race['series_id']]);
+        $legs = (int) $this->db->value('SELECT COUNT(DISTINCT series_leg) FROM qp_stakes WHERE series_id = ? AND active = 1', [$race['series_id']]);
+        $won = (int) $this->db->value(
+            "SELECT COUNT(DISTINCT r.series_leg) FROM qp_entries e JOIN qp_races r ON r.id = e.race_id
+              WHERE e.horse_id = ? AND e.finish_position = 1 AND r.status = 'run' AND r.series_id = ? AND YEAR(r.game_date) = ?",
+            [$winner['id'], $race['series_id'], (int) substr($race['game_date'], 0, 4)]
+        );
+        if ($series['kind'] === 'triple' && $legs > 0 && $won >= $legs) {
+            $this->db->run('INSERT IGNORE INTO qp_badges (member_id, badge_code, tier) VALUES (?, ?, 1)', [$winner['owner_id'], $series['badge_code']]);
         }
     }
 

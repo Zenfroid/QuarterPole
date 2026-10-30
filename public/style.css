@@ -75,3 +75,8 @@ table.chart th, table.chart td { padding: 8px 6px; }
 .topic-list a.on { background: var(--surface); font-weight: 700; color: var(--text); }
 form input.line { display: block; width: 100%; max-width: none; margin: 0 0 6px; padding: 8px; font: inherit; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
 @media (max-width: 700px) { .report-admin { grid-template-columns: 1fr; } .topic-list { flex-direction: row; flex-wrap: wrap; } }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin: -8px 0 16px; }
+.badge { padding: 3px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-text); font-size: .85rem; font-weight: 600; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0 16px; }
+tr.muted td { color: var(--muted); }
+table.list.wrap td { white-space: normal; }
