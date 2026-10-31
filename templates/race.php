@@ -32,7 +32,7 @@ $post = function (string $action, array $fields, string $label) use ($race): str
   <p class="text-body-secondary">
     <?= e(GameClock::label(new DateTimeImmutable($race['game_date']))) ?> (real date <?= e($race['run_on']) ?>) ·
     Purse <?= e(money($race['purse'])) ?> · Entry fee <?= e(money($fee)) ?>
-    <?php if ($race['track_condition']): ?> · Track <?= e($race['track_condition']) ?><?php endif ?>
+    <?php if ($going): ?> · Track: <strong><?= e(ucfirst($going)) ?></strong><?php endif ?>
   </p>
 
   <?php if ($member && $member->isAdmin && in_array($race['race_level'], ['g1', 'g2', 'g3'], true) && $race['stakes_id'] === null): ?>

@@ -1,5 +1,6 @@
 <?php
 // The race calendar: pick a day, see its race cards.
+use QuarterPole\Race\TrackConditions;
 use QuarterPole\View;
 
 require __DIR__ . '/_boot.php';
@@ -17,4 +18,6 @@ $races = $db->all(
        FROM qp_races r JOIN qp_tracks t ON t.id = r.track_id WHERE r.run_on = ? ORDER BY t.name, r.id',
     [$day]
 );
-View::render('races', $shared + compact('day', 'days', 'races', 'realToday'));
+// Today's going is rolled on first look if the nightly run hasn't set it; later days show only once set.
+$going = $day === $realToday ? (new TrackConditions($db))->forDay($day) : (new TrackConditions($db))->known($day);
+View::render('races', $shared + compact('day', 'days', 'races', 'realToday', 'going'));

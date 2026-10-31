@@ -51,7 +51,8 @@ CREATE TABLE qp_transactions (
   amount        BIGINT       NOT NULL,           -- positive = in, negative = out
   balance_after BIGINT       NOT NULL,
   kind          ENUM('start','purse','entry_fee','stud_fee_in','stud_fee_out','sale','purchase',
-                     'claim_in','claim_out','refund','interest','genetic_test','trainer_report','admin') NOT NULL,
+                     'claim_in','claim_out','refund','interest','genetic_test','trainer_report','admin',
+                     'transfer_in','transfer_out') NOT NULL,
   ref_table     VARCHAR(32)  NULL,               -- e.g. 'qp_races'
   ref_id        BIGINT UNSIGNED NULL,
   note          VARCHAR(255) NULL,
@@ -129,6 +130,7 @@ CREATE TABLE qp_horses (
   stat_potency     TINYINT UNSIGNED NOT NULL,
   energy           TINYINT UNSIGNED NOT NULL DEFAULT 100,  -- current %, not a peak stat
   peak_age         TINYINT UNSIGNED NOT NULL,      -- 2 to 5, hidden, inherited
+  peak_years       TINYINT UNSIGNED NOT NULL DEFAULT 2,    -- 1 to 3 game years held at peak, hidden, inherited
   training_progress DECIMAL(5,2) NOT NULL DEFAULT 0,       -- 0-100 boost toward peak before peak age
   is_great         TINYINT(1)   NOT NULL DEFAULT 0,
   is_dud           TINYINT(1)   NOT NULL DEFAULT 0,
@@ -140,9 +142,7 @@ CREATE TABLE qp_horses (
   gene_g           CHAR(2)      NOT NULL,          -- 'GG','Gg','gg'
   gene_cr          VARCHAR(6)   NOT NULL,          -- 'Cr/Cr','Cr/n','n/n'
   gene_o           CHAR(2)      NOT NULL,          -- 'On','nn' (OO is lethal)
-  gene_w5          CHAR(2)      NOT NULL,          -- 'Wn','nn'
-  gene_w20         CHAR(2)      NOT NULL,          -- 'WW','Wn','nn'
-  gene_w22         CHAR(2)      NOT NULL,          -- 'Wn','nn'
+  gene_w           VARCHAR(7)   NOT NULL DEFAULT 'n/n', -- dominant white, one locus: 'W5/W20','W20/n','n/n' (W5/W5, W5/W22, W22/W22 lethal)
   color_name       VARCHAR(60)  NOT NULL,          -- display text, e.g. 'Grey (Chestnut)'
   genetics_tested  TINYINT(1)   NOT NULL DEFAULT 0,
 
@@ -302,6 +302,16 @@ CREATE TABLE qp_races (
   CONSTRAINT fk_race_track  FOREIGN KEY (track_id)  REFERENCES qp_tracks(id),
   CONSTRAINT fk_race_series FOREIGN KEY (series_id) REFERENCES qp_series(id),
   CONSTRAINT fk_race_stakes FOREIGN KEY (stakes_id) REFERENCES qp_stakes(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- The going for each track, surface and race day, set the night before so players can see it.
+CREATE TABLE qp_track_conditions (
+  track_id   SMALLINT UNSIGNED NOT NULL,
+  run_on     DATE NOT NULL,
+  surface    ENUM('dirt','turf','steeplechase') NOT NULL,
+  track_condition VARCHAR(16) NOT NULL,
+  PRIMARY KEY (track_id, run_on, surface),
+  CONSTRAINT fk_tc_track FOREIGN KEY (track_id) REFERENCES qp_tracks(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- One row per horse in a race, player or ghost.

@@ -10,6 +10,7 @@ declare(strict_types=1);
 use QuarterPole\Db;
 use QuarterPole\Race\Runner;
 use QuarterPole\Race\Schedule;
+use QuarterPole\Race\TrackConditions;
 use QuarterPole\TrainerNotes;
 
 if (PHP_SAPI !== 'cli') {
@@ -56,3 +57,6 @@ printf("Basic trainer's notes written: %d\n", count($turning2));
 
 $tomorrow = (new DateTimeImmutable($today))->modify('+1 day')->format('Y-m-d');
 printf("Added %d races.\n", $schedule->fill($tomorrow));
+
+// Set tomorrow's track conditions now, so players see them all day before the races.
+printf("Track conditions set for tomorrow at %d tracks\n", count((new TrackConditions($db))->forDay($tomorrow)));

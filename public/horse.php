@@ -18,7 +18,6 @@ $reports = $db->all(
     [$horse['id']]
 );
 $tree = (new Pedigree($db))->tree($horse, 3);
-$peakYears = $gameSettings->int('peak_years');
 $offspring = $db->all('SELECT id, name, birth_game_date FROM qp_horses WHERE sire_id = ? OR dam_id = ? ORDER BY birth_game_date DESC, name', [$horse['id'], $horse['id']]);
 $testCost = $gameSettings->int('genetic_test_cost');
 $reportCosts = ['experienced' => $gameSettings->int('report_cost_experienced'), 'expert' => $gameSettings->int('report_cost_expert')];
@@ -29,4 +28,4 @@ $raceRecord = $db->all(
       WHERE e.horse_id = ? ORDER BY r.run_on DESC, r.id DESC LIMIT 30',
     [$horse['id']]
 );
-View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'peakYears', 'offspring', 'testCost', 'raceRecord', 'reportCosts', 'trpCredits'));
+View::render('horse', $shared + compact('horse', 'isOwner', 'reports', 'tree', 'offspring', 'testCost', 'raceRecord', 'reportCosts', 'trpCredits'));

@@ -54,7 +54,7 @@ INSERT INTO qp_settings (setting_key, setting_value, description) VALUES
 ('training_progress_per_session', '0.25', 'Training progress points per Train; 100 = full peak'),
 ('running_style_lean',        '10',      'Foundation stat lean by running style'),
 -- Aging
-('peak_years',                '2',       'Game years a horse stays at peak'),
+('peak_years',                '1,3',     'Game years a horse stays at peak: shortest,longest (rolled per horse, foals inherit it)'),
 ('old_age_start',             '25',      'Death risk begins'),
 ('old_age_max',               '32',      'Death certain by'),
 -- Racing

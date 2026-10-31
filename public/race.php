@@ -1,6 +1,7 @@
 <?php
 // One race: entries and the Enter form before it runs, the chart after.
 use QuarterPole\Race\Entries;
+use QuarterPole\Race\TrackConditions;
 use QuarterPole\View;
 
 require __DIR__ . '/_boot.php';
@@ -37,4 +38,9 @@ $myClaims = $stable ? array_column($db->all(
     [$race['id'], $member->id]
 ), 'entry_id') : [];
 $isOpen = $race['status'] === 'open' && $race['run_on'] >= date('Y-m-d');
-View::render('race', $shared + compact('race', 'field', 'calls', 'fractions', 'candidates', 'fee', 'myClaims', 'isOpen'));
+// The going: the race's own once it has run; otherwise the day's, once it's been set (today's is set on first look).
+$conditions = new TrackConditions($db);
+$going = $race['track_condition']
+    ?? ($race['run_on'] === date('Y-m-d') ? $conditions->get((int) $race['track_id'], $race['run_on'], $race['surface'])
+        : ($conditions->known($race['run_on'])[(int) $race['track_id']][$race['surface']] ?? null));
+View::render('race', $shared + compact('race', 'field', 'calls', 'fractions', 'candidates', 'fee', 'myClaims', 'isOpen', 'going'));

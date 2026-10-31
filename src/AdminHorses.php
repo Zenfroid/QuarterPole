@@ -20,6 +20,7 @@ final class AdminHorses
         'stat_potency'    => ['Potency', 1, 100],
         'energy'          => ['Energy %', 0, 100],
         'peak_age'        => ['Peak age', 2, 5],
+        'peak_years'      => ['Years at peak', 1, 3],
         'starts'          => ['Starts', 0, 65000],
         'wins'            => ['Wins', 0, 65000],
         'places'          => ['Seconds', 0, 65000],

@@ -1,6 +1,6 @@
 <?php use QuarterPole\Race\Calls; use QuarterPole\Race\Entries; use QuarterPole\Csrf; use QuarterPole\GameClock; use QuarterPole\Horse; use QuarterPole\Maturity; use QuarterPole\Training;
 $age = GameClock::ageOn($horse['birth_game_date'], $today);
-$maturity = Maturity::factor($horse, $age, Maturity::yearFraction($today), $peakYears);
+$maturity = Maturity::factor($horse, $age, Maturity::yearFraction($today));
 $labels = ['basic' => 'Basic trainer', 'experienced' => 'Experienced trainer', 'expert' => 'Expert trainer'];
 $isStallion = $horse['sex'] === 'M' && !$horse['gelded'];
 $link = fn (?array $h) => $h ? '<a href="horse.php?id=' . (int) $h['id'] . '">' . e($h['name']) . '</a>' : '<span class="text-body-secondary">Foundation</span>';
@@ -82,7 +82,7 @@ $action = function (string $name, string $label) use ($horse): string {
       <h2>Genetic test</h2>
       <p class="genes">
         E: <?= e($horse['gene_e']) ?> · A: <?= e($horse['gene_a']) ?> · G: <?= e($horse['gene_g']) ?> · Cr: <?= e($horse['gene_cr']) ?> ·
-        O: <?= e($horse['gene_o']) ?> · W5: <?= e($horse['gene_w5']) ?> · W20: <?= e($horse['gene_w20']) ?> · W22: <?= e($horse['gene_w22']) ?>
+        O: <?= e($horse['gene_o']) ?> · W: <?= e($horse['gene_w']) ?>
       </p>
     </div>
   <?php endif ?>
