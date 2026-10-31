@@ -5,7 +5,7 @@ The design decisions live in the design doc: https://claude.ai/artifact/1UuQMPLW
 
 ## Files
 
-- `public/`: the web root (point the domain here). Each page is its own file (`races.php`, `horse.php`, `admin_settings.php` ...), and each starts with `require __DIR__ . '/_boot.php';`, which loads the game and the login. `index.php` (welcome), `rules.php` and `guide.php` are plain HTML between the header and footer. `style.css` is the look.
+- `public/`: the web root (point the domain here). Each page is its own file (`races.php`, `horse.php`, `admin_settings.php` ...), and each starts with `require __DIR__ . '/_boot.php';`, which loads the game and the login. `index.php` (welcome), `rules.php` and `guide.php` are plain HTML between the header and footer. The look is Bootstrap 5 (loaded in `templates/header.php`, where one line swaps in a Bootswatch theme) plus a few extras in `style.css`.
 - `src/`: game code (database, settings, login, stables, horse creation, color genetics, trainer notes, breeding, and the race engine in `src/Race/`).
 - `templates/`: the HTML for each game page, plus `header.php` and `footer.php` shared by every page.
 - `bin/`: command-line scripts (the daily cron and the game stallion maker).
