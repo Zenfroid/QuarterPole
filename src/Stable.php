@@ -50,6 +50,29 @@ final class Stable
               ORDER BY $order LIMIT $perPage OFFSET $offset",
             [$memberId, $status]
         );
+        $this->attachEntries($rows);
         return ['rows' => $rows, 'total' => $total, 'pages' => max(1, (int) ceil($total / $perPage))];
+    }
+
+    /** Adds 'entries' to each horse: its races not yet run, soonest first. */
+    private function attachEntries(array &$rows): void
+    {
+        foreach ($rows as &$r) {
+            $r['entries'] = [];
+        }
+        unset($r);
+        if (!$rows) {
+            return;
+        }
+        $byId = array_flip(array_column($rows, 'id'));
+        $ids = implode(',', array_map('intval', array_keys($byId)));
+        $entries = $this->db->all(
+            "SELECT e.horse_id, r.id AS race_id, r.name, r.race_level, r.run_on, t.name AS track_name
+               FROM qp_entries e JOIN qp_races r ON r.id = e.race_id JOIN qp_tracks t ON t.id = r.track_id
+              WHERE e.horse_id IN ($ids) AND r.status IN ('open','closed') ORDER BY r.run_on, r.id"
+        );
+        foreach ($entries as $en) {
+            $rows[$byId[$en['horse_id']]]['entries'][] = $en;
+        }
     }
 }

@@ -91,6 +91,8 @@ tr.text-body-secondary td { color: var(--bs-secondary-color); }
 .cards .card a { color: var(--bs-body-color); text-decoration: none; }
 .cards .card a:hover { color: var(--qp-accent); }
 .card-action { margin-top: .5rem; }
+.horse-card .entered { display: block; margin-top: .35rem; font-weight: 600; text-decoration: none; }
+.horse-card .entered:hover { text-decoration: underline; }
 .admin-cards a.card { text-decoration: none; color: var(--bs-body-color); gap: .35rem; }
 .admin-icon { font-size: 1.6rem; color: var(--bs-primary); }
 .admin-cards a.card:hover { border-color: var(--qp-accent); }
