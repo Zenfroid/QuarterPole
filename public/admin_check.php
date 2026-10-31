@@ -7,7 +7,7 @@ need_admin();
 // Fingerprints of the Oct 31 fix-list release.
 $expected = [
     'quarterpole/src/Race/TrackConditions.php' => '66e8c523ade580947cc801838dc19144',
-    'quarterpole/src/Bank.php' => 'f1e3df23b16428151daf1d1e7e816e3a',
+    'quarterpole/src/Bank.php' => 'daeb7d34b39be69c1b575e52f2933918',
     'quarterpole/src/bootstrap.php' => '23f7f00c7a6b6eebd886ca9f4064a3bf',
     'quarterpole/src/helpers.php' => '9ed78c9a033b891fc7117c38cf117321',
     'quarterpole/src/Genetics/Color.php' => '14dc37e3ac3066fe309627272bd69873',
@@ -15,7 +15,7 @@ $expected = [
     'quarterpole/templates/header.php' => '4aaa61c22405b4c3b29a4cf27aebcf4a',
     'quarterpole/templates/races.php' => 'f0dd2737cf45ebf81f48c6e2b223cef1',
     'quarterpole/templates/dashboard.php' => '183128127a7fc4d1e0d1a415e38e2d7a',
-    'quarterpole/templates/bank.php' => 'd29ace2cf1109fb4e82974bf96177db7',
+    'quarterpole/templates/bank.php' => '3c2604ef6cab5a1ce8dd0e712b2a90df',
     'public_html/_boot.php' => 'd0dc99064865f5ffcc2d49ba8497e8cc',
     'public_html/races.php' => '117ad98e19427979b7914a6351565869',
     'public_html/bank.php' => 'c6b664dcf98b27b91a2e7469b0c4d8c7',
