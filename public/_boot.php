@@ -32,12 +32,25 @@ $today   = $clock->today();
 $shared  = ['config' => $config, 'member' => $member, 'stable' => $stable, 'auth' => $auth, 'today' => $today];
 
 // A rule broken in a form (UserError) shows its message and sends the player back to the page they came from.
+// Any other error is logged; admins see what went wrong and where, everyone else a plain apology.
 set_exception_handler(function (Throwable $e) {
-    if (!$e instanceof UserError) {
-        throw $e;
+    if ($e instanceof UserError) {
+        View::flash($e->getMessage(), 'error');
+        View::redirect(back_url());
     }
-    View::flash($e->getMessage(), 'error');
-    View::redirect(back_url());
+    error_log((string) $e);
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    echo '<div style="font:16px/1.5 system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:1rem 1.25rem;border:2px solid #c0392b;border-radius:8px;background:#fff">';
+    echo '<h1 style="font-size:1.3rem;margin:0 0 .5rem">Something went wrong on this page.</h1>';
+    if (($GLOBALS['member'] ?? null)?->isAdmin) {
+        echo '<p><strong>Admin only:</strong> copy this and send it to whoever maintains the code.</p><pre style="white-space:pre-wrap;background:#f6f6f6;padding:.75rem">'
+            . e(get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine() . "\n\n" . $e->getTraceAsString()) . '</pre>';
+    } else {
+        echo '<p>Please try again in a minute. If it keeps happening, let us know on the forum.</p>';
+    }
+    echo '</div>';
 });
 
 /** The page the player came from, on this site only. */
