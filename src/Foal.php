@@ -60,7 +60,8 @@ final class Foal
         $row['surface_pref']  = $surface;
         $row['running_style'] = ['front', 'steady', 'close'][mt_rand(0, 2)];
         $row['peak_age']      = max(2, min(5, (int) ($fromSire() ? $sire['peak_age'] : $dam['peak_age']) + mt_rand(-1, 1)));
-        [$shortest, $longest] = $s->intList('peak_years');
+        $range = $s->intList('peak_years');
+        [$shortest, $longest] = [min($range), max($range)];
         $row['peak_years']    = max($shortest, min($longest, (int) ($fromSire() ? $sire['peak_years'] : $dam['peak_years']) + mt_rand(-1, 1)));
 
         $row['is_dud']   = (int) (mt_rand(1, 100) <= $this->dudChance($coi));

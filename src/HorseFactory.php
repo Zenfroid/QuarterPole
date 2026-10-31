@@ -108,7 +108,8 @@ final class HorseFactory
         $row['endurance_f'] = round(min($hi + 0.5, max($lo, $endurance)), 2);
         $row['stamina_f']   = round(max(0.5, min(2.0, $stamina)), 2);
         $row['peak_age']    = mt_rand(2, 5);
-        [$shortest, $longest] = $this->settings->intList('peak_years');
+        $range = $this->settings->intList('peak_years');
+        [$shortest, $longest] = [min($range), max($range)];
         $row['peak_years']  = mt_rand($shortest, $longest);
 
         $genes = Color::randomFoundation();
