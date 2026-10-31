@@ -230,10 +230,12 @@ final class Runner
         foreach (HorseFactory::STATS as $s) {
             $row[$s] = max(25, $row[$s] - mt_rand(0, $drop));
         }
-        // Ghosts run at their peak age so the weaker stats are what they race on.
+        // Ghosts develop like any foundation horse: their own peak age, some training,
+        // and Energy that isn't always full, so a young ghost is as green as a young player horse.
         $maxAge = $race['age_max'] === null ? (int) $race['age_min'] + 3 : (int) $race['age_max'];
         $age = mt_rand((int) $race['age_min'], $maxAge);
-        $row['peak_age'] = max(2, min(5, $age));
+        $row['training_progress'] = mt_rand(0, 40);
+        $row['energy'] = mt_rand(70, 100);
         $sex = match ($race['sex_rule']) {
             'fillies_mares' => 'F',
             'colts_geldings' => 'M',
