@@ -20,8 +20,11 @@ final class Entries
         if ($h['status'] !== 'active') {
             return 'only active horses can race';
         }
-        if ($h['surface_pref'] !== $race['surface']) {
-            return 'runs on ' . $h['surface_pref'] . ', not ' . $race['surface'];
+        if ($h['racing_surface'] === null) {
+            return 'no racing surface chosen yet';
+        }
+        if ($h['racing_surface'] !== $race['surface']) {
+            return 'races on ' . $h['racing_surface'] . ', not ' . $race['surface'];
         }
         $age = GameClock::ageOn($h['birth_game_date'], new \DateTimeImmutable($race['game_date']));
         if ($age < (int) $race['age_min'] || ($race['age_max'] !== null && $age > (int) $race['age_max'])) {
@@ -76,7 +79,7 @@ final class Entries
         $horses = $this->db->all(
             "SELECT h.*, (SELECT r.id FROM qp_entries e JOIN qp_races r ON r.id = e.race_id
                            WHERE e.horse_id = h.id AND r.run_on = ? AND r.status IN ('open','closed') LIMIT 1) AS busy_race
-               FROM qp_horses h WHERE h.owner_id = ? AND h.status = 'active' AND h.surface_pref = ? ORDER BY h.name",
+               FROM qp_horses h WHERE h.owner_id = ? AND h.status = 'active' AND h.racing_surface = ? ORDER BY h.name",
             [$race['run_on'], $memberId, $race['surface']]
         );
         foreach ($horses as &$h) {

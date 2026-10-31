@@ -5,7 +5,7 @@
     <p class="card card-body mb-3">Pick a stallion from the <a href="stallions.php">stallions at stud</a> first.</p>
   <?php else: ?>
     <p class="lead mb-1">Stallion: <a href="horse.php?id=<?= (int) $sire['id'] ?>"><?= e($sire['name']) ?></a>
-      · <?= GameClock::ageOn($sire['birth_game_date'], $today) ?>-year-old · <?= e($sire['color_name']) ?> · prefers <?= e($sire['surface_pref']) ?></p>
+      · <?= GameClock::ageOn($sire['birth_game_date'], $today) ?>-year-old · <?= e($sire['color_name']) ?> <?= $sire['racing_surface'] ? '· raced on the ' . e($sire['racing_surface']) : '' ?></p>
 
     <?php if (!$mares): ?>
       <p class="card card-body mb-3">You have no mares ready to breed. A mare must be at least 4 and retired to breeding (open her page and choose Retire to breeding).</p>

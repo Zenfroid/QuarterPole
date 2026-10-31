@@ -9,11 +9,7 @@
     <label>Sex
       <select class="form-select" name="sex"><option value="M">Colt / Stallion</option><option value="F">Filly / Mare</option></select>
     </label>
-    <label>Surface
-      <select class="form-select" name="surface">
-        <option value="dirt">Dirt</option><option value="turf">Turf</option><option value="steeplechase">Steeplechase</option>
-      </select>
-    </label>
+    <p class="small text-body-secondary">Every horse is best on one surface: dirt, turf or over jumps. It's a surprise: read your trainer's notes on the horse's page, then choose the surface it races on.</p>
     <label>Age <input class="form-control" type="number" name="age" min="2" max="20" value="2" required></label>
     <p class="small text-body-secondary">Older mares can have foals with earlier birth years (backdated foals), so they cost no more to create.</p>
     <button type="submit" class="btn btn-primary" <?= $stable['creation_credits'] < 1 ? 'disabled' : '' ?>>Create horse</button>

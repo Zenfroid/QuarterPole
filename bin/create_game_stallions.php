@@ -24,6 +24,7 @@ foreach (['dirt', 'turf', 'steeplechase'] as $surface) {
         $name = Names::unique($db);
 
         $row = $factory->rollFoundation($surface);
+        $row['racing_surface'] = $surface;
         // Game studs are proven stock: lift their racing stats a little.
         foreach (['stat_break', 'stat_sprint', 'stat_speed', 'stat_drive', 'stat_potency'] as $stat) {
             $row[$stat] = min(100, $row[$stat] + mt_rand(0, 10));

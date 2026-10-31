@@ -26,6 +26,7 @@
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link<?= nav_active('races.php', 'race.php') ?>" href="races.php"><i class="bi bi-flag"></i> Races</a></li>
+        <li class="nav-item"><a class="nav-link<?= nav_active('results.php') ?>" href="results.php"><i class="bi bi-trophy"></i> Results</a></li>
         <li class="nav-item"><a class="nav-link<?= nav_active('stallions.php', 'breed.php') ?>" href="stallions.php"><i class="bi bi-stars"></i> Stallions</a></li>
         <li class="nav-item"><a class="nav-link<?= nav_active('rules.php') ?>" href="rules.php"><i class="bi bi-journal-text"></i> Rules</a></li>
         <li class="nav-item"><a class="nav-link<?= nav_active('guide.php') ?>" href="guide.php"><i class="bi bi-signpost-split"></i> Guide</a></li>
@@ -38,10 +39,11 @@
             <li class="nav-item"><span class="navbar-text stat-pill" title="Creation credits"><i class="bi bi-ticket-perforated"></i> <?= (int) $stable['creation_credits'] ?></span></li>
           <?php endif ?>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?= nav_active('dashboard.php', 'create_horse.php', 'bank.php') ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle"></i> <?= e($member->name) ?></a>
+            <a class="nav-link dropdown-toggle<?= nav_active('dashboard.php', 'breeding.php', 'create_horse.php', 'bank.php') ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle"></i> <?= e($member->name) ?></a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="dashboard.php"><i class="bi bi-house-door"></i> Dashboard</a></li>
               <?php if ($stable): ?>
+                <li><a class="dropdown-item" href="breeding.php"><i class="bi bi-heart"></i> Breeding barn</a></li>
                 <li><a class="dropdown-item" href="create_horse.php"><i class="bi bi-plus-circle"></i> Create a horse</a></li>
                 <li><a class="dropdown-item" href="bank.php"><i class="bi bi-bank"></i> Bank</a></li>
               <?php endif ?>

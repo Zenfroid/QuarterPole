@@ -16,12 +16,12 @@ final class Bank
 
     public function __construct(private Db $db) {}
 
-    /** Sends Cash from one stable to another, named by its stable name. Returns the message to show. */
-    public function send(int $fromId, string $toName, string $amount, string $note): string
+    /** Sends Cash from one stable to another, picked by its owner's member id. Returns the message to show. */
+    public function send(int $fromId, string $toId, string $amount, string $note): string
     {
-        $to = $this->db->one('SELECT * FROM qp_stables WHERE stable_name = ?', [trim($toName)]);
+        $to = ctype_digit($toId) ? $this->db->one('SELECT * FROM qp_stables WHERE member_id = ?', [(int) $toId]) : null;
         if (!$to) {
-            throw new UserError('There is no stable called "' . trim($toName) . '". Check the spelling.');
+            throw new UserError('Pick a stable to send the Cash to.');
         }
         if ((int) $to['member_id'] === $fromId) {
             throw new UserError("You can't send Cash to your own stable.");
@@ -54,9 +54,9 @@ final class Bank
         );
     }
 
-    /** Every other stable's name, for the "send to" suggestions. */
+    /** Every other stable, for the "send to" list. */
     public function otherStables(int $memberId): array
     {
-        return $this->db->all('SELECT stable_name FROM qp_stables WHERE member_id <> ? ORDER BY stable_name', [$memberId]);
+        return $this->db->all('SELECT member_id, stable_name FROM qp_stables WHERE member_id <> ? ORDER BY stable_name', [$memberId]);
     }
 }

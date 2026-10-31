@@ -2,7 +2,7 @@
 $select = function (string $col) use ($horse): string {
     $html = '<select class="form-select" name="' . e($col) . '">';
     foreach (AdminHorses::CHOICES[$col] as $v => $label) {
-        $html .= '<option value="' . e($v) . '"' . ($horse[$col] === $v ? ' selected' : '') . '>' . e($label) . '</option>';
+        $html .= '<option value="' . e($v) . '"' . ((string) ($horse[$col] ?? '') === (string) $v ? ' selected' : '') . '>' . e($label) . '</option>';
     }
     return $html . '</select>';
 };
@@ -27,7 +27,8 @@ $other = array_diff_key(AdminHorses::NUMBERS, $stats);
         <label>Owner (forum member number, blank for none) <input class="form-control" type="text" name="owner_id" value="<?= e((string) ($horse['owner_id'] ?? '')) ?>"></label>
         <label>Status <?= $select('status') ?></label>
         <label>Sex <?= $select('sex') ?></label>
-        <label>Surface <?= $select('surface_pref') ?></label>
+        <label>Best surface (hidden) <?= $select('surface_pref') ?></label>
+        <label>Racing surface (owner's choice) <?= $select('racing_surface') ?></label>
         <label>Running style <?= $select('running_style') ?></label>
         <label>Stud fee (blank = not standing) <input class="form-control" type="text" name="stud_fee" value="<?= e((string) ($horse['stud_fee'] ?? '')) ?>"></label>
       </div>

@@ -16,7 +16,7 @@ $action = function (string $name, string $label) use ($horse): string {
   <p class="lead mb-1">
     <?= $age ?>-year-old <?= e(strtolower(Horse::sexLabel($horse, $age))) ?> ·
     <?= e($horse['color_name']) ?> ·
-    <?= surface_badge($horse['surface_pref']) ?> ·
+    <?= surface_badge($horse['racing_surface']) ?> ·
     <?= e(ucfirst($horse['status'])) ?><?= $horse['status'] === 'retired' ? ' to breeding' : '' ?>
   </p>
   <p class="text-body-secondary">
@@ -41,6 +41,29 @@ $action = function (string $name, string $label) use ($horse): string {
         <a class="btn btn-primary" href="races.php">Find a race</a>
       <?php endif ?>
     </div>
+
+    <?php if ($isOwner && $horse['status'] === 'active'): ?>
+      <div class="card card-body mb-3<?= $horse['racing_surface'] === null ? ' border border-2 border-primary' : '' ?>">
+        <h2>Racing surface</h2>
+        <?php if ($horse['racing_surface'] === null): ?>
+          <p><strong>Choose where <?= e($horse['name']) ?> races.</strong> Every horse is best on one surface; your trainer's notes below give you a clue. It can only enter races on the surface you pick.</p>
+        <?php else: ?>
+          <p>Races on: <?= surface_badge($horse['racing_surface']) ?></p>
+          <p class="small text-body-secondary">You can switch surfaces whenever it has no races entered. Horses run below their best away from the surface that suits them.</p>
+        <?php endif ?>
+        <form method="post" action="horse_action.php" class="d-flex flex-wrap gap-2 align-items-center">
+          <?= Csrf::field() ?>
+          <input type="hidden" name="horse_id" value="<?= (int) $horse['id'] ?>">
+          <input type="hidden" name="action" value="surface">
+          <select class="form-select w-auto" name="surface">
+            <?php foreach (['dirt' => 'Dirt', 'turf' => 'Turf', 'steeplechase' => 'Steeplechase'] as $k => $label): ?>
+              <option value="<?= $k ?>" <?= $horse['racing_surface'] === $k ? 'selected' : '' ?>><?= $label ?></option>
+            <?php endforeach ?>
+          </select>
+          <button type="submit" class="btn btn-primary"><?= $horse['racing_surface'] === null ? 'Choose' : 'Switch' ?></button>
+        </form>
+      </div>
+    <?php endif ?>
 
     <div class="card card-body mb-3">
       <h2>Pedigree</h2>

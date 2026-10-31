@@ -11,23 +11,27 @@
     <p class="badges"><?php foreach ($badges as $b): ?><span class="badge rounded-pill text-bg-success"><?= e($b['name'] ?? ucwords(str_replace('_', ' ', $b['badge_code']))) ?></span><?php endforeach ?></p>
   <?php endif ?>
 
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link active" href="dashboard.php"><i class="bi bi-flag"></i> Racing (<?= (int) $list['total'] ?>)</a></li>
+    <li class="nav-item"><a class="nav-link" href="breeding.php"><i class="bi bi-heart"></i> Breeding barn (<?= (int) $barnCount ?>)</a></li>
+  </ul>
+
   <?php if (!$list['rows']): ?>
     <div class="card card-body mb-3 empty">
       <i class="bi bi-house-heart"></i>
-      <p class="mb-0">Your stable is empty. Use a creation credit to bring in your first foundation horse.</p>
+      <p class="mb-0"><?= $barnCount ? 'No horses in training right now.' : 'Your stable is empty.' ?> Use a creation credit to bring in a foundation horse<?= $barnCount ? ', or breed one in the Breeding barn' : '' ?>.</p>
     </div>
   <?php else: ?>
     <div class="cards">
       <?php foreach ($list['rows'] as $h): $age = GameClock::ageOn($h['birth_game_date'], $today); ?>
-        <div class="card card-body horse-card surface-edge-<?= e($h['surface_pref']) ?>">
+        <div class="card card-body horse-card surface-edge-<?= e((string) $h['racing_surface']) ?>">
           <div class="d-flex justify-content-between align-items-start gap-2">
             <a href="horse.php?id=<?= (int) $h['id'] ?>" class="horse-name"><?= e($h['name']) ?></a>
-            <?= surface_badge($h['surface_pref']) ?>
+            <?= surface_badge($h['racing_surface']) ?>
           </div>
           <span><?= $age ?>yo <?= e(Horse::sexLabel($h, $age)) ?></span>
           <span><?= e($h['color_name']) ?></span>
           <span class="record" title="(Starts) Wins-Seconds-Thirds, earnings">(<?= (int) $h['starts'] ?>) <?= (int) $h['wins'] ?>-<?= (int) $h['places'] ?>-<?= (int) $h['shows'] ?> $<?= e(number_format((int) $h['earnings'])) ?></span>
-          <?php if ($h['status'] === 'retired'): ?><span class="text-body-secondary">Retired</span><?php endif ?>
           <?php if ($h['status'] === 'active'): ?>
             <span class="energy-label">Energy</span>
             <div class="progress energy" role="progressbar" aria-label="Energy" aria-valuenow="<?= (int) $h['energy'] ?>" aria-valuemin="0" aria-valuemax="100" title="Energy <?= (int) $h['energy'] ?>%">

@@ -46,6 +46,7 @@ INSERT INTO qp_settings (setting_key, setting_value, description) VALUES
 ('dud_pct_first_cousin',      '3',       'COI around 6.25%'),
 ('dud_pct_half_sibling',      '8',       'COI around 12.5%'),
 ('dud_pct_severe',            '15',      'COI 25% or more'),
+('foundation_surface_weights','50,30,20', 'Chance a new foundation horse is best on dirt,turf,steeplechase (relative weights)'),
 ('surface_mutation_pct',      '12',      'Chance a foal prefers a different surface (10 to 15)'),
 ('book_cap_player',           '100',     'Max mares per player stallion per game year'),
 ('book_cap_game',             '25',      'Max mares per game stallion per game year'),

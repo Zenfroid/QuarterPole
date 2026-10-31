@@ -23,7 +23,7 @@
             <td><a href="horse.php?id=<?= (int) $h['id'] ?>"><?= e($h['name']) ?></a></td>
             <td><?= GameClock::ageOn($h['birth_game_date'], $today) ?></td>
             <td><?= e($h['color_name']) ?></td>
-            <td><?= surface_badge($h['surface_pref']) ?></td>
+            <td><?= surface_badge($h['racing_surface']) ?></td>
             <td><?= e($h['owner_name'] ?? 'Quarter Pole Stud') ?></td>
             <td class="num"><?= e(money($h['stud_fee'])) ?></td>
             <td class="num"><?= $left ?> of <?= $cap ?> left</td>

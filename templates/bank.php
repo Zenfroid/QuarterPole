@@ -9,8 +9,10 @@
         <?= Csrf::field() ?>
         <h2><i class="bi bi-send"></i> Send Cash</h2>
         <label>To stable
-          <input class="form-control" type="text" name="to" list="stableNames" maxlength="40" required autocomplete="off">
-          <datalist id="stableNames"><?php foreach ($others as $o): ?><option value="<?= e($o['stable_name']) ?>"><?php endforeach ?></datalist>
+          <select class="form-select" name="to" required>
+            <option value="">Choose a stable…</option>
+            <?php foreach ($others as $o): ?><option value="<?= (int) $o['member_id'] ?>"><?= e($o['stable_name']) ?></option><?php endforeach ?>
+          </select>
         </label>
         <label>Amount <input class="form-control" type="text" name="amount" inputmode="numeric" placeholder="25,000" required></label>
         <label>Note (optional) <input class="form-control" type="text" name="note" maxlength="120" placeholder="For the stud fee"></label>

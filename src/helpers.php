@@ -22,8 +22,11 @@ function ordinal(int $n): string
 }
 
 /** A coloured pill for a surface: dirt, turf or steeplechase. */
-function surface_badge(string $surface): string
+function surface_badge(?string $surface): string
 {
+    if ($surface === null) {
+        return '<span class="badge rounded-pill text-bg-light border">No surface yet</span>';
+    }
     return '<span class="badge rounded-pill surface surface-' . e($surface) . '">' . e(ucfirst($surface)) . '</span>';
 }
 
