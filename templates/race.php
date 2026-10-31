@@ -35,6 +35,19 @@ $post = function (string $action, array $fields, string $label) use ($race): str
     <?php if ($race['track_condition']): ?> · Track <?= e($race['track_condition']) ?><?php endif ?>
   </p>
 
+  <?php if ($member && $member->isAdmin && in_array($race['race_level'], ['g1', 'g2', 'g3'], true) && $race['stakes_id'] === null): ?>
+    <form method="post" action="admin_race.php" class="card card-body mb-3 border-start border-4 border-primary">
+      <?= Csrf::field() ?>
+      <input type="hidden" name="race_id" value="<?= (int) $race['id'] ?>">
+      <h2 class="h5">Name this stakes <span class="badge text-bg-secondary">Admin</span></h2>
+      <label>Name <input class="form-control" type="text" name="name" maxlength="80" value="<?= e($race['name']) ?>" required></label>
+      <label class="check"><input class="form-check-input" type="checkbox" name="yearly" value="1" checked> Run it every year under this name (adds it to the stakes calendar)</label>
+      <div><button type="submit" class="btn btn-primary btn-sm">Save name</button></div>
+    </form>
+  <?php elseif ($member && $member->isAdmin && $race['stakes_id'] !== null): ?>
+    <p class="small text-body-secondary">Admin: rename this race on the <a href="admin_stakes.php?edit=<?= (int) $race['stakes_id'] ?>">stakes calendar</a>.</p>
+  <?php endif ?>
+
   <?php if ($race['status'] === 'cancelled'): ?>
     <p class="card card-body mb-3">This race was cancelled because no player horses were entered.</p>
   <?php endif ?>

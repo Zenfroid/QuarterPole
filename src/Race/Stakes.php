@@ -89,4 +89,43 @@ final class Stakes
         });
         return "$name is saved. Changes apply from the next time it is put on the cards; only the name changes on cards already out.";
     }
+
+    /**
+     * Gives an unnamed graded stakes on the cards a name. With $yearly it also goes on the
+     * stakes calendar, so it comes back under that name every game year.
+     */
+    public function nameRace(int $raceId, string $name, bool $yearly): string
+    {
+        $name = trim(preg_replace('/\s+/', ' ', $name));
+        if ($name === '' || mb_strlen($name) > 80) {
+            throw new UserError('Give the race a name of up to 80 characters.');
+        }
+        $race = $this->db->one('SELECT * FROM qp_races WHERE id = ?', [$raceId]);
+        if (!$race || !in_array($race['race_level'], ['g1', 'g2', 'g3'], true)) {
+            throw new UserError('Only graded stakes can be named.');
+        }
+        if ($race['stakes_id'] !== null) {
+            throw new UserError('This race is already on the stakes calendar. Rename it on the Stakes calendar page.');
+        }
+        if (!$yearly) {
+            $this->db->run('UPDATE qp_races SET name = ? WHERE id = ?', [$name, $raceId]);
+            return "This race is now the $name.";
+        }
+        $game = new \DateTimeImmutable($race['game_date']);
+        $weekday = ['3' => 'wed', '6' => 'sat', '7' => 'sun'][(new \DateTimeImmutable($race['run_on']))->format('N')] ?? null;
+        if ($weekday === null) {
+            throw new UserError('Stakes only run on Wednesdays, Saturdays and Sundays.');
+        }
+        $this->db->transaction(function (Db $db) use ($race, $name, $game, $weekday) {
+            $db->run(
+                'INSERT INTO qp_stakes (name, track_id, race_level, surface, distance_f, age_min, age_max, sex_rule, homebred_only,
+                                        game_month, game_day, weekday, purse, active)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)',
+                [$name, $race['track_id'], $race['race_level'], $race['surface'], $race['distance_f'], $race['age_min'], $race['age_max'],
+                 $race['sex_rule'], $race['homebred_only'], (int) $game->format('n'), min(28, (int) $game->format('j')), $weekday, $race['purse']]
+            );
+            $db->run('UPDATE qp_races SET name = ?, stakes_id = ? WHERE id = ?', [$name, $db->lastId(), $race['id']]);
+        });
+        return "This race is now the $name, and it's on the stakes calendar to run every year around " . $game->format('F j') . '.';
+    }
 }
