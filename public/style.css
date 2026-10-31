@@ -1,8 +1,66 @@
-/* Quarter Pole: extras on top of Bootstrap 5. Colours come from Bootstrap's variables,
-   so a Bootswatch theme recolours these too. */
-:root { --qp-accent: var(--bs-success); }
+/* Quarter Pole: extras on top of Bootstrap 5 and the Bootswatch United theme.
+   Colours come from Bootstrap's variables, so another Bootswatch theme recolours these too. */
+:root {
+  --qp-accent: var(--bs-primary);
+  --qp-dirt: #9a6a3a;
+  --qp-turf: #38b44a;
+  --qp-steeplechase: #2a7ab0;
+}
 
-h1 { font-size: 1.9rem; margin-bottom: .5rem; }
+body { background: #f4f1ee; }
+h1 { font-size: 1.9rem; margin-bottom: .5rem; font-weight: 700; }
+main h2 { font-weight: 700; }
+
+/* Header bar, rail stripe and footer */
+.site-nav { box-shadow: 0 2px 8px rgba(0, 0, 0, .15); }
+.site-nav .navbar-brand { font-weight: 700; letter-spacing: .02em; }
+.site-nav .logo { width: 28px; height: 28px; color: var(--bs-primary); }
+.site-nav .logo .nail { fill: var(--bs-dark); }
+.site-nav .nav-link.active { color: #fff; box-shadow: inset 0 -3px 0 var(--bs-primary); }
+.site-nav .bi { margin-right: .15rem; }
+.site-nav .game-date { font-size: .9rem; }
+.stat-pill { background: rgba(255, 255, 255, .1); border-radius: 999px; padding: .2rem .7rem !important; font-size: .9rem; }
+.dropdown-item .bi { width: 1.3rem; display: inline-block; color: var(--bs-primary); }
+.rail { height: 6px; background: repeating-linear-gradient(90deg, var(--bs-primary) 0 28px, #fff 28px 56px); }
+.site-footer a { color: rgba(255, 255, 255, .75); text-decoration: none; }
+.site-footer a:hover { color: #fff; }
+
+/* Cards: borderless with a soft shadow */
+.card { border: 0; box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 14px rgba(0, 0, 0, .04); }
+.card-header { background: var(--bs-dark); color: #fff; border: 0; }
+h2.card-header { font-size: 1.15rem; margin: 0; padding: .75rem 1rem; }
+.track-card { overflow: hidden; }
+.track-card thead th { background: var(--bs-tertiary-bg); font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; color: var(--bs-secondary-color); }
+.alert .bi { margin-right: .35rem; }
+.empty { text-align: center; padding: 2rem 1rem; }
+.empty .bi { font-size: 2.5rem; color: var(--bs-primary); display: block; margin-bottom: .5rem; }
+
+/* Surface pills and edges */
+.badge.surface { font-weight: 600; font-size: .75rem; vertical-align: .1em; }
+.surface-dirt { background: var(--qp-dirt); color: #fff; }
+.surface-turf { background: var(--qp-turf); color: #fff; }
+.surface-steeplechase { background: var(--qp-steeplechase); color: #fff; }
+.surface-edge-dirt { border-top: 4px solid var(--qp-dirt) !important; }
+.surface-edge-turf { border-top: 4px solid var(--qp-turf) !important; }
+.surface-edge-steeplechase { border-top: 4px solid var(--qp-steeplechase) !important; }
+
+/* Home page */
+.hero {
+  position: relative; overflow: hidden; color: #fff; border-radius: var(--bs-border-radius-lg);
+  padding: 3.5rem 2rem;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.12'%3E%3Crect x='20' y='20' width='360' height='200' rx='100' stroke-width='14'/%3E%3Crect x='60' y='60' width='280' height='120' rx='60' stroke-width='3' stroke-dasharray='10 8'/%3E%3C/g%3E%3C/svg%3E") right -80px center / 620px auto no-repeat,
+    linear-gradient(120deg, var(--bs-dark) 0%, #4a1a34 55%, var(--bs-primary) 140%);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+}
+.hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: .75rem; }
+.hero .lead { max-width: 36rem; color: rgba(255, 255, 255, .85); }
+.hero-kicker { text-transform: uppercase; letter-spacing: .12em; font-size: .8rem; font-weight: 700; color: var(--bs-primary); margin-bottom: .5rem; }
+.hero-text { position: relative; max-width: 40rem; }
+.feature .bi { font-size: 2rem; color: var(--bs-primary); }
+.feature h2 { font-size: 1.15rem; margin: .5rem 0 .4rem; }
+.feature p { margin: 0; color: var(--bs-secondary-color); }
+@media (max-width: 575px) { .hero { padding: 2.5rem 1.25rem; } }
 .card h2 { font-size: 1.3rem; }
 .card h3 { font-size: 1.1rem; margin-top: .75rem; }
 .card.card-body { display: block; }
@@ -19,11 +77,15 @@ tr.text-body-secondary td { color: var(--bs-secondary-color); }
 
 /* Horse cards on the dashboard and admin panel */
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .75rem; }
-.cards .card { gap: 2px; }
+.cards .card { gap: 2px; transition: transform .12s ease, box-shadow .12s ease; }
+.cards .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 0, 0, .1); }
+.horse-card .horse-name { font-weight: 700; font-size: 1.05rem; }
+.progress.energy { height: 6px; }
 .cards .card a { color: var(--bs-body-color); text-decoration: none; }
 .cards .card a:hover { color: var(--qp-accent); }
 .card-action { margin-top: .5rem; }
 .admin-cards a.card { text-decoration: none; color: var(--bs-body-color); gap: .35rem; }
+.admin-icon { font-size: 1.6rem; color: var(--bs-primary); }
 .admin-cards a.card:hover { border-color: var(--qp-accent); }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 1rem; }
 .badges { display: flex; flex-wrap: wrap; gap: .4rem; margin: -.5rem 0 1rem; }
@@ -37,7 +99,10 @@ tr.text-body-secondary td { color: var(--bs-secondary-color); }
 .days { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .5rem; margin-bottom: 1rem; }
 .days a { display: flex; flex-direction: column; min-width: 120px; padding: .5rem .65rem; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); text-decoration: none; color: var(--bs-body-color); }
 .days a span { font-size: .8rem; color: var(--bs-secondary-color); }
-.days a.on { border-color: var(--qp-accent); box-shadow: inset 0 0 0 1px var(--qp-accent); }
+.days a { box-shadow: 0 1px 3px rgba(0, 0, 0, .06); border-color: transparent; }
+.days a:hover { border-color: var(--qp-accent); }
+.days a.on { background: var(--bs-primary); border-color: var(--bs-primary); color: #fff; }
+.days a.on span { color: rgba(255, 255, 255, .85); }
 .filters { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
 .filters a.on { font-weight: 700; text-decoration: none; color: var(--bs-body-color); }
 .report-admin { display: grid; grid-template-columns: 230px 1fr; gap: 1rem; align-items: start; }
@@ -48,6 +113,11 @@ tr.text-body-secondary td { color: var(--bs-secondary-color); }
 
 /* Text pages */
 .page-text { max-width: 780px; }
-.page-text h2 { margin-top: 1.4rem; }
+.page-text h2 { margin-top: 1.4rem; font-size: 1.3rem; padding-left: .6rem; border-left: 4px solid var(--bs-primary); }
+.page-text h2:first-child { margin-top: 0; }
 .page-cta { margin-top: 1.25rem; }
 .search { max-width: 560px; }
+
+/* Keep the footer at the bottom of short pages */
+body { min-height: 100vh; display: flex; flex-direction: column; }
+body > main { flex: 1 0 auto; }

@@ -16,6 +16,7 @@ $action = function (string $name, string $label) use ($horse): string {
   <p class="lead mb-1">
     <?= $age ?>-year-old <?= e(strtolower(Horse::sexLabel($horse, $age))) ?> ·
     <?= e($horse['color_name']) ?> ·
+    <?= surface_badge($horse['surface_pref']) ?> ·
     <?= e(ucfirst($horse['status'])) ?><?= $horse['status'] === 'retired' ? ' to breeding' : '' ?>
   </p>
   <p class="text-body-secondary">
