@@ -11,6 +11,7 @@ $expected = [
     'quarterpole/src/bootstrap.php' => '23f7f00c7a6b6eebd886ca9f4064a3bf',
     'quarterpole/src/helpers.php' => '9ed78c9a033b891fc7117c38cf117321',
     'quarterpole/src/Genetics/Color.php' => '14dc37e3ac3066fe309627272bd69873',
+    'quarterpole/src/Race/Schedule.php' => '0d978bde3db58acb38ad81ddd153cccb',
     'quarterpole/src/Race/Runner.php' => '12d01c0d959ae240091adc5eacc039f1',
     'quarterpole/templates/header.php' => '4aaa61c22405b4c3b29a4cf27aebcf4a',
     'quarterpole/templates/races.php' => 'f0dd2737cf45ebf81f48c6e2b223cef1',

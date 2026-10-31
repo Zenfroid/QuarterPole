@@ -65,9 +65,13 @@ final class Schedule
         $perCard = $this->settings->int('races_per_card');
         $made = 0;
         foreach ($tracks as $track) {
+            $hasOlder = false;
             for ($n = 1; $n <= $perCard; $n++) {
                 $level = $levels[($n - 1) % count($levels)];
-                $this->insert($this->design($track, $level, $kind), $track, $level, $n, $day->format('Y-m-d'), $gameDate);
+                // Every card has at least one race for 3-year-olds and up, so older horses always have somewhere to run.
+                $c = $this->design($track, $level, $kind, 6, $n === $perCard && !$hasOlder);
+                $hasOlder = $hasOlder || $c['age_max'] === null;
+                $this->insert($c, $track, $level, $n, $day->format('Y-m-d'), $gameDate);
                 $made++;
             }
         }
@@ -82,6 +86,7 @@ final class Schedule
         $year = (int) $g->format('Y');
         $made = 0;
         $hasG1 = false;
+        $hasOlder = false;
         $named = $this->db->all(
             'SELECT s.* FROM qp_stakes s JOIN qp_tracks t ON t.id = s.track_id WHERE s.active = 1 AND t.active = 1 AND s.weekday = ?',
             [$weekday]
@@ -97,6 +102,7 @@ final class Schedule
             }
             $this->insertRace($st + ['stakes_id' => $st['id']], $day->format('Y-m-d'), $gameDate);
             $hasG1 = $hasG1 || $st['race_level'] === 'g1';
+            $hasOlder = $hasOlder || $st['age_max'] === null;
             $made++;
         }
 
@@ -114,7 +120,8 @@ final class Schedule
             // Re-roll a few times so one day doesn't carry two races with the same plain name.
             for ($try = 0; $try < 5; $try++) {
                 $track = $tracks[array_rand($tracks)];
-                $c = $this->design($track, $level, $kind, (int) $g->format('n'));
+                // The day's last stakes is for 3-year-olds and up if none of the others are.
+                $c = $this->design($track, $level, $kind, (int) $g->format('n'), $n === $want - 1 && !$hasOlder);
                 if (!$this->db->value('SELECT 1 FROM qp_races WHERE run_on = ? AND name = ?', [$day->format('Y-m-d'), self::stakesName($track, $c)])) {
                     break;
                 }
@@ -125,6 +132,7 @@ final class Schedule
                 'purse' => (int) round(mt_rand($lo, $hi) / 5000) * 5000,
             ];
             $this->insertRace($c, $day->format('Y-m-d'), $gameDate);
+            $hasOlder = $hasOlder || $c['age_max'] === null;
             $made++;
         }
         return $made;
@@ -158,7 +166,7 @@ final class Schedule
     }
 
     /** Surface, distance, age and sex conditions for one race. */
-    private function design(array $track, string $level, string $kind, int $gameMonth = 6): array
+    private function design(array $track, string $level, string $kind, int $gameMonth = 6, bool $older = false): array
     {
         if ($kind === 'steeplechase') {
             $surface = 'steeplechase';
@@ -172,6 +180,8 @@ final class Schedule
         $roll = mt_rand(1, 100);
         if ($surface === 'steeplechase') {
             [$min, $max] = [4, null];
+        } elseif ($older) {
+            [$min, $max] = [3, null];
         } elseif ($roll <= ($level === 'maiden' ? 35 : 20) && $gameMonth >= 5) {
             // Two-year-olds race from late spring, as in real racing.
             [$min, $max] = [2, 2];
