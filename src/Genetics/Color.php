@@ -13,12 +13,17 @@ final class Color
         'A'   => 0.45,  // A, otherwise At or a below
         'At'  => 0.20,
         'G'   => 0.06,
-        'Cr'  => 0.05,
+        'Cr'  => 0.01,  // rare in Thoroughbreds: about 1 horse in 50 carries it
         'O'   => 0.02,
-        'W5'  => 0.02,
+        // Dominant white alleles, all at one locus (KIT). Each copy is one of these or n.
         'W20' => 0.10,
-        'W22' => 0.01,
+        'W5'  => 0.01,
+        'W22' => 0.005,
     ];
+
+    // Dominant white alleles in display order. Two copies of W5 or W22 (in any mix) are lethal; W20 is not.
+    public const WHITE_ORDER = ['W5' => 0, 'W20' => 1, 'W22' => 2, 'n' => 3];
+    public const WHITE_LETHAL = ['W5', 'W22'];
 
     /** A random, non-lethal genotype for a foundation horse. */
     public static function randomFoundation(): array
@@ -35,12 +40,13 @@ final class Color
             'gene_a'   => self::agoutiPair($agouti(), $agouti()),
             'gene_g'   => self::pair($pick($f['G'], 'G', 'g'), $pick($f['G'], 'G', 'g')),
             'gene_cr'  => self::slashPair($pick($f['Cr'], 'Cr', 'n'), $pick($f['Cr'], 'Cr', 'n')),
-            'gene_w20' => self::pair($pick($f['W20'], 'W', 'n'), $pick($f['W20'], 'W', 'n')),
             // Lethal when doubled, so foundation horses carry at most one copy.
-            'gene_o'   => $pick($f['O'],   'On', 'nn'),
-            'gene_w5'  => $pick($f['W5'],  'Wn', 'nn'),
-            'gene_w22' => $pick($f['W22'], 'Wn', 'nn'),
+            'gene_o'   => $pick($f['O'], 'On', 'nn'),
         ];
+        do {
+            $w = [self::whiteAllele(), self::whiteAllele()];
+        } while (self::whiteLethal($w));
+        $g['gene_w'] = self::whitePair($w[0], $w[1]);
         return $g;
     }
 
@@ -62,13 +68,13 @@ final class Color
         }
 
         $hasO   = $g['gene_o'] !== 'nn';
-        $w5     = $g['gene_w5'] !== 'nn';
-        $w22    = $g['gene_w22'] !== 'nn';
-        $w20    = substr_count($g['gene_w20'], 'W');
-        $whites = (int) $w5 + (int) $w22 + (int) ($w20 > 0);
+        $w      = explode('/', $g['gene_w']);
+        $w5     = in_array('W5', $w, true);
+        $w22    = in_array('W22', $w, true);
+        $w20    = count(array_keys($w, 'W20', true));
 
-        // Any two different dominant whites (W20 included) give maximum white.
-        if ($whites >= 2) {
+        // Two different dominant whites (e.g. W5/W20) give maximum white.
+        if ($w[0] !== 'n' && $w[1] !== 'n' && $w[0] !== $w[1]) {
             $name = 'Maximum White (' . $base . ')';
         } else {
             $marks = [];
@@ -85,6 +91,30 @@ final class Color
             return 'Grey (' . $name . ')';
         }
         return $name;
+    }
+
+    /** "W5/W20", "W20/n", "n/n": dominant white alleles in display order. */
+    public static function whitePair(string $x, string $y): string
+    {
+        return self::WHITE_ORDER[$x] <= self::WHITE_ORDER[$y] ? "$x/$y" : "$y/$x";
+    }
+
+    /** True when both dominant white copies are lethal ones (W5/W5, W5/W22, W22/W22). */
+    public static function whiteLethal(array $w): bool
+    {
+        return in_array($w[0], self::WHITE_LETHAL, true) && in_array($w[1], self::WHITE_LETHAL, true);
+    }
+
+    private static function whiteAllele(): string
+    {
+        $r = mt_rand() / mt_getrandmax();
+        foreach (['W20', 'W5', 'W22'] as $allele) {
+            $r -= self::FOUNDATION_FREQ[$allele];
+            if ($r < 0) {
+                return $allele;
+            }
+        }
+        return 'n';
     }
 
     private static function chance(float $p): bool

@@ -16,7 +16,7 @@ final class Maturity
      * @param int $age           whole game years
      * @param float $yearFraction 0..1 through the current game year
      */
-    public static function factor(array $h, int $age, float $yearFraction, int $peakYears): float
+    public static function factor(array $h, int $age, float $yearFraction): float
     {
         $peak = (int) $h['peak_age'];
         $exact = $age + $yearFraction;
@@ -28,7 +28,7 @@ final class Maturity
             $trained = (float) $h['training_progress'] / 100;
             return min(1.0, $base + (1 - $base) * $trained);
         }
-        $pastPeak = $exact - ($peak + $peakYears);
+        $pastPeak = $exact - ($peak + (int) ($h['peak_years'] ?? 2));
         if ($pastPeak <= 0) {
             return 1.0;
         }

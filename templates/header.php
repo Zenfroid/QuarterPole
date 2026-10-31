@@ -10,7 +10,8 @@
        Bootswatch name, e.g. https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/united/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="style.css">
+  <!-- The ?v= number changes whenever site.css is uploaded, so browsers fetch the new copy. -->
+  <link rel="stylesheet" href="site.css?v=<?= (int) @filemtime(dirname($_SERVER['SCRIPT_FILENAME']) . '/site.css') ?>">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-dark site-nav" data-bs-theme="dark">
@@ -33,14 +34,17 @@
         <li class="nav-item"><span class="navbar-text game-date"><i class="bi bi-calendar3"></i> <?= e(GameClock::label($today)) ?></span></li>
         <?php if ($member): ?>
           <?php if ($stable): ?>
-            <li class="nav-item"><span class="navbar-text stat-pill" title="Cash"><i class="bi bi-cash-coin"></i> <?= e(number_format((int) $stable['cash'])) ?></span></li>
+            <li class="nav-item"><a class="navbar-text stat-pill text-decoration-none" href="bank.php" title="Cash: open the Bank"><i class="bi bi-cash-coin"></i> <?= e(number_format((int) $stable['cash'])) ?></a></li>
             <li class="nav-item"><span class="navbar-text stat-pill" title="Creation credits"><i class="bi bi-ticket-perforated"></i> <?= (int) $stable['creation_credits'] ?></span></li>
           <?php endif ?>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle<?= nav_active('dashboard.php', 'create_horse.php') ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle"></i> <?= e($member->name) ?></a>
+            <a class="nav-link dropdown-toggle<?= nav_active('dashboard.php', 'create_horse.php', 'bank.php') ?>" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle"></i> <?= e($member->name) ?></a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="dashboard.php"><i class="bi bi-house-door"></i> Dashboard</a></li>
-              <?php if ($stable): ?><li><a class="dropdown-item" href="create_horse.php"><i class="bi bi-plus-circle"></i> Create a horse</a></li><?php endif ?>
+              <?php if ($stable): ?>
+                <li><a class="dropdown-item" href="create_horse.php"><i class="bi bi-plus-circle"></i> Create a horse</a></li>
+                <li><a class="dropdown-item" href="bank.php"><i class="bi bi-bank"></i> Bank</a></li>
+              <?php endif ?>
               <?php if ($member->isAdmin): ?><li><a class="dropdown-item" href="admin.php"><i class="bi bi-gear"></i> Admin panel</a></li><?php endif ?>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="<?= e($auth->logoutUrl()) ?>"><i class="bi bi-box-arrow-right"></i> Log out</a></li>

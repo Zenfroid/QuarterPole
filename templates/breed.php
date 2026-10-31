@@ -37,7 +37,7 @@
             <?php if (!$proposal['both_tested']): ?>
               <span class="text-body-secondary">Unknown. Genetic-test both parents to see it.</span>
             <?php elseif ($proposal['lethal'] > 0): ?>
-              <strong class="text-danger"><?= round($proposal['lethal'] * 100) ?>% chance the foal is born dead.</strong> Both parents carry the same lethal white gene.
+              <strong class="text-danger"><?= round($proposal['lethal'] * 100) ?>% chance the foal is born dead.</strong> Both parents carry a lethal white gene (Frame Overo, or W5 or W22 dominant white).
             <?php else: ?>
               None
             <?php endif ?>

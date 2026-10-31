@@ -1,4 +1,4 @@
-<?php use QuarterPole\GameClock; use QuarterPole\Race\Calls; use QuarterPole\Race\Entries;
+<?php use QuarterPole\GameClock; use QuarterPole\Race\Calls; use QuarterPole\Race\Entries; use QuarterPole\Race\TrackConditions;
 $byTrack = [];
 foreach ($races as $r) {
     $byTrack[$r['track_name']][] = $r;
@@ -30,7 +30,12 @@ $status = function (array $r) use ($realToday): string {
 
   <?php foreach ($byTrack as $track => $list): ?>
     <div class="card mb-4 track-card">
-    <h2 class="card-header"><i class="bi bi-geo-alt"></i> <?= e($track) ?></h2>
+    <div class="card-header d-flex flex-wrap align-items-center gap-2">
+      <h2 class="mb-0 me-auto"><i class="bi bi-geo-alt"></i> <?= e($track) ?></h2>
+      <?php foreach ($going[(int) $list[0]['track_id']] ?? [] as $surface => $condition): ?>
+        <span class="going<?= TrackConditions::isOff($condition) ? ' off' : '' ?>" title="Track condition"><?= e(ucfirst($surface)) ?>: <strong><?= e(TrackConditions::label($condition)) ?></strong></span>
+      <?php endforeach ?>
+    </div>
     <div class="table-wrap">
       <table class="table table-hover align-middle mb-0">
         <thead><tr><th>Race</th><th>Type</th><th>Conditions</th><th>Distance</th><th class="num">Purse</th><th class="num">Entry</th><th class="num">Field</th><th></th></tr></thead>
@@ -52,5 +57,5 @@ $status = function (array $r) use ($realToday): string {
     </div>
     </div>
   <?php endforeach ?>
-  <p class="small text-body-secondary">Entries close when the evening's races run. Races with fewer than 5 horses are filled with ghost horses; races with no player horses are cancelled.</p>
+  <p class="small text-body-secondary">Track conditions for each day are set the night before and show beside the track name. Entries close when the evening's races run. Races with fewer than 5 horses are filled with ghost horses; races with no player horses are cancelled.</p>
 </section>

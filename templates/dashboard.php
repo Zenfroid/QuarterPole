@@ -26,9 +26,11 @@
           </div>
           <span><?= $age ?>yo <?= e(Horse::sexLabel($h, $age)) ?></span>
           <span><?= e($h['color_name']) ?></span>
-          <span class="text-body-secondary"><?= (int) $h['starts'] ?> starts, <?= (int) $h['wins'] ?> wins<?= $h['status'] === 'retired' ? ' · Retired' : '' ?></span>
+          <span class="record" title="(Starts) Wins-Seconds-Thirds, earnings">(<?= (int) $h['starts'] ?>) <?= (int) $h['wins'] ?>-<?= (int) $h['places'] ?>-<?= (int) $h['shows'] ?> $<?= e(number_format((int) $h['earnings'])) ?></span>
+          <?php if ($h['status'] === 'retired'): ?><span class="text-body-secondary">Retired</span><?php endif ?>
           <?php if ($h['status'] === 'active'): ?>
-            <div class="progress energy mt-1" role="progressbar" aria-label="Energy" aria-valuenow="<?= (int) $h['energy'] ?>" aria-valuemin="0" aria-valuemax="100" title="Energy <?= (int) $h['energy'] ?>%">
+            <span class="energy-label">Energy</span>
+            <div class="progress energy" role="progressbar" aria-label="Energy" aria-valuenow="<?= (int) $h['energy'] ?>" aria-valuemin="0" aria-valuemax="100" title="Energy <?= (int) $h['energy'] ?>%">
               <div class="progress-bar <?= $h['energy'] < 50 ? 'bg-warning' : 'bg-success' ?>" style="width: <?= (int) $h['energy'] ?>%"></div>
             </div>
           <?php endif ?>

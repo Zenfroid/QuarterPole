@@ -10,7 +10,7 @@ final class Inheritance
     public static function alleles(string $locus, string $g): array
     {
         return match ($locus) {
-            'gene_a', 'gene_cr' => explode('/', $g),
+            'gene_a', 'gene_cr', 'gene_w' => explode('/', $g),
             default => self::twoChar($g),
         };
     }
@@ -19,7 +19,7 @@ final class Inheritance
     public static function cross(array $sire, array $dam): array
     {
         $foal = [];
-        foreach (['gene_e', 'gene_a', 'gene_g', 'gene_cr', 'gene_o', 'gene_w5', 'gene_w20', 'gene_w22'] as $locus) {
+        foreach (['gene_e', 'gene_a', 'gene_g', 'gene_cr', 'gene_o', 'gene_w'] as $locus) {
             $s = self::alleles($locus, $sire[$locus]);
             $d = self::alleles($locus, $dam[$locus]);
             $foal[$locus] = self::format($locus, $s[mt_rand(0, 1)], $d[mt_rand(0, 1)]);
@@ -27,26 +27,28 @@ final class Inheritance
         return $foal;
     }
 
-    /** Homozygous Frame Overo, W5 or W22: the foal is born dead. */
+    /** Homozygous Frame Overo, or two lethal dominant whites (W5/W5, W5/W22, W22/W22): the foal is lost. */
     public static function isLethal(array $g): bool
     {
-        return $g['gene_o'] === 'OO'
-            || $g['gene_w5'] === 'WW'
-            || $g['gene_w22'] === 'WW';
+        return $g['gene_o'] === 'OO' || Color::whiteLethal(explode('/', $g['gene_w']));
     }
 
     /** Chance (0 to 1) that a cross of these two genotypes is lethal. */
     public static function lethalChance(array $sire, array $dam): float
     {
         $p = 1.0;  // chance the foal survives every lethal locus
-        foreach (['gene_o', 'gene_w5', 'gene_w22'] as $locus) {
-            $sHas = self::carries($sire[$locus]);
-            $dHas = self::carries($dam[$locus]);
-            // Carriers are always heterozygous (homozygotes die), so each passes it half the time.
-            if ($sHas && $dHas) {
-                $p *= 0.75;
+        // Frame Overo carriers are always heterozygous (homozygotes die), so each passes it half the time.
+        if (self::carries($sire['gene_o']) && self::carries($dam['gene_o'])) {
+            $p *= 0.75;
+        }
+        // Dominant white: count the allele pairs a foal can get that are lethal.
+        $lethal = 0;
+        foreach (explode('/', $sire['gene_w']) as $s) {
+            foreach (explode('/', $dam['gene_w']) as $d) {
+                $lethal += (int) Color::whiteLethal([$s, $d]);
             }
         }
+        $p *= 1 - $lethal / 4;
         return 1 - $p;
     }
 
@@ -68,6 +70,8 @@ final class Inheritance
                 return $rank[$x] <= $rank[$y] ? "$x/$y" : "$y/$x";
             case 'gene_cr':
                 return $x === 'n' ? "$y/$x" : "$x/$y";
+            case 'gene_w':
+                return Color::whitePair($x, $y);
             default:
                 // Dominant/variant allele first: 'Ee', 'Gg', 'On', 'Wn'.
                 $isVariant = fn (string $a) => $a !== 'n' && ctype_upper($a);

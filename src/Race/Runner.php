@@ -54,10 +54,9 @@ final class Runner
             shuffle($entries);
             $runners = [];
             $gameDate = new \DateTimeImmutable($race['game_date']);
-            $peakYears = $this->settings->int('peak_years');
             foreach ($entries as $i => $h) {
                 $db->run('UPDATE qp_entries SET post_position = ? WHERE id = ?', [$i + 1, $h['entry_id']]);
-                $f = Maturity::factor($h, GameClock::ageOn($h['birth_game_date'], $gameDate), Maturity::yearFraction($gameDate), $peakYears);
+                $f = Maturity::factor($h, GameClock::ageOn($h['birth_game_date'], $gameDate), Maturity::yearFraction($gameDate));
                 $r = $h;
                 foreach (self::RATED as $s) {
                     $r["stat_$s"] = (float) $h["stat_$s"] * $f;
@@ -65,7 +64,7 @@ final class Runner
                 $runners[(int) $h['entry_id']] = $r;
             }
 
-            $race['track_condition'] = $this->condition($track, $race['surface']);
+            $race['track_condition'] = (new TrackConditions($db))->get((int) $track['id'], $race['run_on'], $race['surface']);
             $engine = new Engine([
                 'noise'          => $this->settings->float('race_noise_pct') / 100,
                 'form'           => $this->settings->float('race_form_pct') / 100,
@@ -254,17 +253,6 @@ final class Runner
             array_values($row)
         );
         return $this->db->lastId();
-    }
-
-    /** Track condition for the day, from the track's rain chance and profile. */
-    private function condition(array $track, string $surface): string
-    {
-        $rain = mt_rand(1, 100) <= (int) $track['rain_chance_pct'];
-        $dryGood = ['mostly_fast' => 20, 'varied' => 40, 'wet' => 50][$track['condition_profile']] ?? 40;
-        if ($surface === 'dirt') {
-            return $rain ? (mt_rand(0, 1) ? 'muddy' : 'sloppy') : (mt_rand(1, 100) <= $dryGood ? 'good' : 'fast');
-        }
-        return $rain ? (mt_rand(1, 100) <= 60 ? 'yielding' : 'soft') : (mt_rand(1, 100) <= $dryGood ? 'good' : 'firm');
     }
 
     /** Daily Energy recovery for every horse that can race. */
