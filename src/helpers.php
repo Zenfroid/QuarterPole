@@ -35,3 +35,14 @@ function nav_active(string ...$files): string
 {
     return in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), $files, true) ? ' active' : '';
 }
+
+/** "today", "tomorrow" or e.g. "Sat Nov 7" for a real-world race day. */
+function entry_day(string $runOn, string $realToday): string
+{
+    $days = (int) (new DateTimeImmutable($realToday))->diff(new DateTimeImmutable($runOn))->format('%r%a');
+    return match ($days) {
+        0 => 'today',
+        1 => 'tomorrow',
+        default => date('D M j', strtotime($runOn)),
+    };
+}

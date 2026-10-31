@@ -49,6 +49,11 @@
           <?php elseif ($h['status'] === 'active'): ?>
             <span class="text-body-secondary card-action small"><i class="bi bi-check2"></i> Trained today</span>
           <?php endif ?>
+          <?php foreach ($h['entries'] as $en): ?>
+            <a class="entered small" href="race.php?id=<?= (int) $en['race_id'] ?>">
+              <i class="bi bi-flag-fill"></i> Entered <?= e(entry_day($en['run_on'], $realToday)) ?>: <?= e($en['track_name']) ?>, <?= e($en['name'] ?: ucfirst($en['race_level'])) ?>
+            </a>
+          <?php endforeach ?>
         </div>
       <?php endforeach ?>
     </div>
