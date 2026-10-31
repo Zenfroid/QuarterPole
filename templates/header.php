@@ -26,6 +26,7 @@
     <div class="collapse navbar-collapse" id="mainNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link<?= nav_active('races.php', 'race.php') ?>" href="races.php"><i class="bi bi-flag"></i> Races</a></li>
+        <li class="nav-item"><a class="nav-link<?= nav_active('results.php') ?>" href="results.php"><i class="bi bi-trophy"></i> Results</a></li>
         <li class="nav-item"><a class="nav-link<?= nav_active('stallions.php', 'breed.php') ?>" href="stallions.php"><i class="bi bi-stars"></i> Stallions</a></li>
         <li class="nav-item"><a class="nav-link<?= nav_active('rules.php') ?>" href="rules.php"><i class="bi bi-journal-text"></i> Rules</a></li>
         <li class="nav-item"><a class="nav-link<?= nav_active('guide.php') ?>" href="guide.php"><i class="bi bi-signpost-split"></i> Guide</a></li>
