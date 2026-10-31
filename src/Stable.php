@@ -35,18 +35,20 @@ final class Stable
         });
     }
 
-    /** One page of a stable's horses for the card view. */
-    public function horses(int $memberId, int $page, int $perPage = 12): array
+    /**
+     * One page of a stable's horses for the card view. $status 'active' is the racing string
+     * (Dashboard); 'retired' is the breeding barn, stallions first, each with their foal count.
+     */
+    public function horses(int $memberId, int $page, string $status = 'active', int $perPage = 12): array
     {
         $offset = max(0, ($page - 1) * $perPage);
-        $total = (int) $this->db->value(
-            "SELECT COUNT(*) FROM qp_horses WHERE owner_id = ? AND status IN ('active','retired')",
-            [$memberId]
-        );
+        $total = (int) $this->db->value('SELECT COUNT(*) FROM qp_horses WHERE owner_id = ? AND status = ?', [$memberId, $status]);
+        $order = $status === 'retired' ? 'h.sex DESC, h.name' : 'h.name';
         $rows = $this->db->all(
-            "SELECT * FROM qp_horses WHERE owner_id = ? AND status IN ('active','retired')
-             ORDER BY status, name LIMIT $perPage OFFSET $offset",
-            [$memberId]
+            "SELECT h.*, (SELECT COUNT(*) FROM qp_horses f WHERE f.sire_id = h.id OR f.dam_id = h.id) AS foals
+               FROM qp_horses h WHERE h.owner_id = ? AND h.status = ?
+              ORDER BY $order LIMIT $perPage OFFSET $offset",
+            [$memberId, $status]
         );
         return ['rows' => $rows, 'total' => $total, 'pages' => max(1, (int) ceil($total / $perPage))];
     }
