@@ -10,7 +10,8 @@
        Bootswatch name, e.g. https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/united/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="style.css">
+  <!-- The ?v= number changes whenever site.css is uploaded, so browsers fetch the new copy. -->
+  <link rel="stylesheet" href="site.css?v=<?= (int) @filemtime(dirname($_SERVER['SCRIPT_FILENAME']) . '/site.css') ?>">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg bg-dark site-nav" data-bs-theme="dark">
