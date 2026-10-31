@@ -10,7 +10,6 @@ if ($isPost) {
     $id = (new HorseFactory($db, $gameSettings, $clock))->createFoundation($member->id, [
         'name'    => (string) ($_POST['name'] ?? ''),
         'sex'     => (string) ($_POST['sex'] ?? ''),
-        'surface' => (string) ($_POST['surface'] ?? ''),
         'age'     => (int) ($_POST['age'] ?? 0),
     ]);
     View::flash('Your new foundation horse has arrived.');

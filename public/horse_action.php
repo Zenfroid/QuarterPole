@@ -1,5 +1,5 @@
 <?php
-// Handles the owner's buttons on a horse's page (retire, test, trainers, pension, TRP, stud settings).
+// Handles the owner's buttons on a horse's page (racing surface, retire, test, trainers, pension, TRP, stud settings).
 use QuarterPole\HorseActions;
 use QuarterPole\View;
 
@@ -11,6 +11,7 @@ $horseId = (int) ($_POST['horse_id'] ?? 0);
 $actions = new HorseActions($db, $gameSettings);
 View::flash(match ($_POST['action'] ?? '') {
     'retire'  => $actions->retire($member->id, $horseId),
+    'surface' => $actions->setSurface($member->id, $horseId, (string) ($_POST['surface'] ?? '')),
     'test'    => $actions->geneticTest($member->id, $horseId),
     'report_experienced' => $actions->upgradeReport($member->id, $horseId, 'experienced', $clock->today()),
     'report_expert'      => $actions->upgradeReport($member->id, $horseId, 'expert', $clock->today()),

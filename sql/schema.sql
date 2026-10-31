@@ -115,6 +115,7 @@ CREATE TABLE qp_horses (
 
   -- Hidden stats, 25 to 100 unless noted. Values are the horse's PEAK.
   surface_pref     ENUM('dirt','turf','steeplechase') NOT NULL,
+  racing_surface   ENUM('dirt','turf','steeplechase') NULL,   -- chosen by the owner; NULL until they pick one
   running_style    ENUM('front','steady','close') NOT NULL,
   endurance_f      DECIMAL(4,2) NOT NULL,          -- furlongs
   stamina_f        DECIMAL(4,2) NOT NULL,          -- furlongs of kick (0.25 to 3.00)

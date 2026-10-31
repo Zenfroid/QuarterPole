@@ -225,6 +225,7 @@ final class Runner
     private function makeGhost(array $race): int
     {
         $row = (new HorseFactory($this->db, $this->settings, $this->clock))->rollFoundation($race['surface']);
+        $row['racing_surface'] = $race['surface'];
         $drop = $this->settings->int('ghost_stat_drop_max');
         foreach (HorseFactory::STATS as $s) {
             $row[$s] = max(25, $row[$s] - mt_rand(0, $drop));

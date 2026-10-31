@@ -21,18 +21,17 @@ final class HorseFactory
     public function __construct(private Db $db, private Settings $settings, private GameClock $clock) {}
 
     /**
-     * @param array{name:string, sex:string, surface:string, age:int} $input
+     * @param array{name:string, sex:string, age:int} $input
      * @return int the new horse id
      */
     public function createFoundation(int $memberId, array $input): int
     {
         $name    = Horse::validateName($this->db, $input['name']);
         $sex     = $input['sex'] === 'F' ? 'F' : 'M';
-        $surface = $input['surface'];
         $age     = (int) $input['age'];
-        if (!isset(self::ENDURANCE[$surface])) {
-            throw new UserError('Pick a surface.');
-        }
+        // The horse's best surface is rolled and kept hidden: the owner reads the trainer's notes
+        // and chooses a racing surface on the horse's page.
+        $surface = self::weightedSurface($this->settings->intList('foundation_surface_weights'));
         if ($age < 2 || $age > 20) {
             throw new UserError('Foundation horses must be 2 to 20 years old.');
         }
@@ -67,6 +66,20 @@ final class HorseFactory
             );
             return $id;
         });
+    }
+
+    /** Dirt, turf or steeplechase, by relative weights (dirt,turf,steeplechase). */
+    private static function weightedSurface(array $weights): string
+    {
+        $surfaces = ['dirt', 'turf', 'steeplechase'];
+        $roll = mt_rand(1, max(1, array_sum($weights)));
+        foreach ($surfaces as $i => $surface) {
+            $roll -= (int) ($weights[$i] ?? 0);
+            if ($roll <= 0) {
+                return $surface;
+            }
+        }
+        return 'dirt';
     }
 
     /** Random stats, style, peak age and color for a foundation horse. */

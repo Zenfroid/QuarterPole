@@ -16,7 +16,7 @@
           <td class="num"><?= (int) $h['id'] ?></td>
           <td><a href="horse.php?id=<?= (int) $h['id'] ?>"><?= e($h['name']) ?></a></td>
           <td><?= $age ?>yo <?= e(strtolower(Horse::sexLabel($h, $age))) ?></td>
-          <td><?= e($h['surface_pref']) ?></td>
+          <td><?= e((string) $h['racing_surface']) ?> <span class="text-body-secondary">(best: <?= e($h['surface_pref']) ?>)</span></td>
           <td><?= e($h['stable_name'] ?? ($h['origin'] === 'game_stallion' ? 'Quarter Pole Stud' : ($h['origin'] === 'ghost' ? 'House horse' : 'None'))) ?></td>
           <td><?= e(ucfirst($h['status'])) ?></td>
           <td><a class="btn btn-primary btn-sm" href="admin_horse.php?id=<?= (int) $h['id'] ?>">Edit</a></td>

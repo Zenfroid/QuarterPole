@@ -39,6 +39,7 @@ final class AdminHorses
         'sex'           => ['M' => 'Male', 'F' => 'Female'],
         'status'        => ['active' => 'Active', 'retired' => 'Retired to breeding', 'pensioned' => 'Pensioned', 'rehomed' => 'Rehomed (TRP)', 'deceased' => 'Deceased'],
         'surface_pref'  => ['dirt' => 'Dirt', 'turf' => 'Turf', 'steeplechase' => 'Steeplechase'],
+        'racing_surface' => ['' => 'Not chosen', 'dirt' => 'Dirt', 'turf' => 'Turf', 'steeplechase' => 'Steeplechase'],
         'running_style' => ['front' => 'Front runner', 'steady' => 'Steady', 'close' => 'Closer'],
     ];
 
@@ -85,12 +86,13 @@ final class AdminHorses
         }
 
         foreach (self::CHOICES as $col => $options) {
-            $v = (string) ($in[$col] ?? $h[$col]);
+            $current = (string) ($h[$col] ?? '');   // racing_surface can be NULL, shown as ''
+            $v = (string) ($in[$col] ?? $current);
             if (!isset($options[$v])) {
                 throw new UserError('Pick a value for ' . str_replace('_', ' ', $col) . '.');
             }
-            if ($v !== $h[$col]) {
-                $new[$col] = $v;
+            if ($v !== $current) {
+                $new[$col] = $v === '' ? null : $v;
             }
         }
         foreach (['gelded', 'offered_for_sale', 'genetics_tested'] as $col) {

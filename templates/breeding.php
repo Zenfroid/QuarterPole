@@ -26,10 +26,10 @@
       <h2 class="h4 mt-2"><?= $title ?></h2>
       <div class="cards mb-4">
         <?php foreach ($horses as $h): $age = GameClock::ageOn($h['birth_game_date'], $today); ?>
-          <div class="card card-body horse-card surface-edge-<?= e($h['surface_pref']) ?>">
+          <div class="card card-body horse-card surface-edge-<?= e((string) $h['racing_surface']) ?>">
             <div class="d-flex justify-content-between align-items-start gap-2">
               <a href="horse.php?id=<?= (int) $h['id'] ?>" class="horse-name"><?= e($h['name']) ?></a>
-              <?= surface_badge($h['surface_pref']) ?>
+              <?= surface_badge($h['racing_surface']) ?>
             </div>
             <span><?= $age ?>yo <?= e(Horse::sexLabel($h, $age)) ?></span>
             <span><?= e($h['color_name']) ?></span>

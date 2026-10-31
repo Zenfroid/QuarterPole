@@ -18,6 +18,30 @@ final class HorseActions
         return $h;
     }
 
+    /** Chooses or changes the surface an active horse races on. Free, but not while it has open entries. */
+    public function setSurface(int $memberId, int $horseId, string $surface): string
+    {
+        if (!in_array($surface, ['dirt', 'turf', 'steeplechase'], true)) {
+            throw new UserError('Pick dirt, turf or steeplechase.');
+        }
+        return $this->db->transaction(function (Db $db) use ($memberId, $horseId, $surface) {
+            $h = $this->owned($db, $memberId, $horseId);
+            if ($h['status'] !== 'active') {
+                throw new UserError('Only horses in training race.');
+            }
+            if ($h['racing_surface'] === $surface) {
+                return $h['name'] . ' already races on ' . $surface . '.';
+            }
+            if ($db->value("SELECT 1 FROM qp_entries e JOIN qp_races r ON r.id = e.race_id WHERE e.horse_id = ? AND r.status = 'open' LIMIT 1", [$horseId])) {
+                throw new UserError('Scratch ' . $h['name'] . ' from its races before changing surface.');
+            }
+            $db->run('UPDATE qp_horses SET racing_surface = ? WHERE id = ?', [$surface, $horseId]);
+            $label = ['dirt' => 'the dirt', 'turf' => 'the turf', 'steeplechase' => 'over jumps'][$surface];
+            return $h['name'] . ' will now race ' . $label . '.'
+                . ($surface === 'steeplechase' ? ' Steeplechases are for 4-year-olds and up.' : '');
+        });
+    }
+
     /** Active to Retired (breeding). One way only: retired horses never race again. */
     public function retire(int $memberId, int $horseId): string
     {

@@ -20,7 +20,7 @@ final class Breeding
                  WHERE h.sex = 'M' AND h.gelded = 0 AND h.status = 'retired' AND h.stud_fee IS NOT NULL";
         $params = [$year];
         if ($surface) {
-            $sql .= ' AND h.surface_pref = ?';
+            $sql .= ' AND h.racing_surface = ?';
             $params[] = $surface;
         }
         return $this->db->all($sql . ' ORDER BY h.stud_fee DESC, h.name', $params);
